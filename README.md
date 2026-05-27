@@ -1,43 +1,40 @@
-# Astro Starter Kit: Minimal
+# QM Journal
 
-```sh
-npm create astro@latest -- --template minimal
-```
+A working notebook for learning quantum mechanics by building it. Each entry pairs careful prose explanation with interactive widgets where the math is computed in C++ compiled to WebAssembly.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Live site
 
-## 🚀 Project Structure
+[link to your deployment, once you deploy]
 
-Inside of your Astro project, you'll see the following folders and files:
+## Stack
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+- **Astro 5** with MDX for content
+- **C++ → WebAssembly** via Emscripten for physics computation
+- **D3.js** for plotting
+- **KaTeX** for math rendering
+- **Vanilla CSS** — no Tailwind, no framework
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Run locally
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Requires Node 18+, [Emscripten](https://emscripten.org/), and Python 3.
 
-Any static assets, like images, can be placed in the `public/` directory.
+\`\`\`bash
+git clone https://github.com/YOUR_USERNAME/qm-journal
+cd qm-journal
+npm install
+./build.sh        # compile C++ to WebAssembly
+npm run dev       # serve at localhost:4321
+\`\`\`
 
-## 🧞 Commands
+## Entries
 
-All commands are run from the root of the project, from a terminal:
+- **Lecture 00** — Wave functions, Normalization, Expected values
+- **Exp. 01** — The particle in a box
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Architecture
 
-## 👀 Want to learn more?
+[Brief paragraph about the design — the split between C++ physics and JS visualization, the MDX-as-content authoring, etc.]
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## License
+
+MIT (see LICENSE)
