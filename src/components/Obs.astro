@@ -1,0 +1,30 @@
+---
+const { n } = Astro.props;
+---
+<div class="observation" data-num={`Obs. ${n}`}>
+  <slot />
+</div>
+
+<style is:global>
+  .observation {
+    margin: 1.25rem 0;
+    padding-left: 3.5rem;
+    position: relative;
+  }
+  .observation::before {
+    content: attr(data-num);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-right: 1px solid var(--rule);
+    padding-right: 0.75rem;
+    width: 2.75rem;
+    text-align: right;
+    line-height: 1.6;
+  }
+</style>

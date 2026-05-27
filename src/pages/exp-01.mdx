@@ -1,0 +1,42 @@
+---
+layout: ../layouts/Experiment.astro
+title: The particle in a box
+subtitle: The "Hello World" of QM; the simplest bound state — an infinite square well of width L, with the particle's wavefunction forced to vanish at the walls.
+expNumber: "01"
+date: 2026-05-23
+tags: [Single particle, 1D, Time-independent]
+---
+
+import Challenge from '../components/Challenge.astro';
+import Obs from '../components/Obs.astro';
+import SideNote from '../components/SideNote.astro';
+import ParticleInBox from '../components/ParticleInBox.astro';
+import WikiLink from '../components/WikiLink.astro';
+
+
+<Challenge>
+Before reading further, drag the sliders below. **Find the value of n that puts an internal node at exactly x = L/2.** Why does only every other state do this?
+</Challenge>
+
+## Apparatus
+<ParticleInBox />
+
+## Observations
+
+<Obs n={1}>
+**Quantization is the price of boundary conditions.** The walls demand ψ(0) = ψ(L) = 0. Only sine waves that fit a half-integer number of wavelengths into the box satisfy that, which selects a discrete set of allowed states labeled by *n* = 1, 2, 3, …. The full derivation, including the normalization that makes <em>A = √(2/L)</em>, was worked out in <WikiLink slug="lecture-00" display="the foundations lecture" />.<SideNote n={1}>Cosines fail the left boundary: cos(0) = 1, not 0. Inside an infinite well the most general solution is a sum of sine and cosine; the cosine coefficient is killed by ψ(0) = 0.</SideNote>
+</Obs>
+
+<Obs n={2}>
+The energy is *E<sub>n</sub> = n² π² ℏ² / (2 m L²)*. Two scalings worth feeling: **E ∝ n²** and **E ∝ 1/L²**.<SideNote n={2}>This 1/L² scaling is essentially why atoms have a size. Confining an electron near the nucleus increases kinetic energy faster than the Coulomb attraction lowers potential energy.</SideNote>
+</Obs>
+
+<Obs n={3}>
+**The node theorem.** The state *n* has exactly *n* − 1 internal zero crossings. This isn't a quirk of the square well — it holds for every 1D bound-state problem.<SideNote n={3}>The harmonic oscillator (Exp. 02, coming soon) is the next concrete example.</SideNote>
+</Obs>
+
+## Open questions
+
+- What happens if the walls aren't infinitely high? The finite well admits *tunneling*.
+- What is the time evolution of a *superposition* like ψ₁ + ψ₂? The energy levels suggest a beat frequency proportional to (E₂ − E₁).
+- The momentum eigenstates of this Hamiltonian are not the energy eigenstates. What does ⟨p²⟩ look like for ψₙ?

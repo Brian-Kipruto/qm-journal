@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exp. 01 · Particle in a Box</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    :root {
+      --paper: #faf6ee;
+      --ink: #1a1a1a;
+      --ink-soft: #4a4a4a;
+      --ink-faint: #8a8a8a;
+      --rule: #d8d1c2;
+      --psi: #2a4d8f;
+      --rho: #993d3d;
+      --accent-faint: #f0ead9;
+      --serif: 'EB Garamond', Georgia, serif;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Consolas', monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { background: var(--paper); color: var(--ink); }
+    body {
+      font-family: var(--serif);
+      font-size: 19px;
+      line-height: 1.55;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ===== Lab notebook page frame ===== */
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      column-gap: 3rem;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        grid-template-columns: 1fr;
+        padding: 2rem 1.25rem 4rem;
+      }
+    }
+
+    .main { min-width: 0; }  /* prevents grid blowout */
+    .margin { min-width: 0; }
+
+    /* ===== Header ===== */
+    .exp-header {
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding: 0.75rem 0;
+      margin-bottom: 2rem;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      color: var(--ink-soft);
+    }
+    .exp-header strong { color: var(--ink); letter-spacing: 0.08em; }
+
+    h1 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 2.6rem;
+      line-height: 1.15;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.01em;
+    }
+    .subtitle {
+      font-style: italic;
+      color: var(--ink-soft);
+      margin: 0 0 2.5rem;
+      font-size: 1.1rem;
+    }
+
+    /* ===== Section labels ===== */
+    .section-label {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin: 2.5rem 0 0.75rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* ===== Body text ===== */
+    p { margin: 0 0 1rem; }
+    em { font-style: italic; }
+    strong { font-weight: 600; }
+    .main a { color: var(--psi); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+    /* ===== Challenge box ===== */
+    .challenge {
+      background: var(--accent-faint);
+      border-left: 3px solid var(--ink);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      font-style: italic;
+    }
+    .challenge::before {
+      content: "Try it ↓";
+      display: block;
+      font-family: var(--sans);
+      font-style: normal;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ===== Apparatus ===== */
+    .apparatus {
+      border: 1px solid var(--rule);
+      background: #fcfaf4;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .apparatus-meta {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px dashed var(--rule);
+    }
+    .plots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    @media (max-width: 700px) {
+      .plots { grid-template-columns: 1fr; }
+    }
+    .plot-caption {
+      text-align: center;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      margin: 0.25rem 0 0.5rem;
+    }
+    svg.plot { width: 100%; height: auto; display: block; }
+
+    /* ===== Controls ===== */
+    .controls {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--rule);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.6rem 1rem;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+    .controls label { color: var(--ink-soft); }
+    .controls .value { text-align: right; color: var(--ink); min-width: 4rem; }
+    .controls input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 2px;
+      background: var(--ink-soft);
+      outline: none;
+    }
+    .controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--ink);
+      cursor: pointer;
+    }
+    .controls input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--ink);
+      border: none;
+      cursor: pointer;
+    }
+
+    .readout {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--rule);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+    .readout .label { color: var(--ink-faint); }
+
+    /* ===== Live values in prose ===== */
+    .live {
+      font-family: var(--mono);
+      font-size: 0.92em;
+      background: var(--accent-faint);
+      padding: 0 0.25rem;
+      border-radius: 2px;
+    }
+
+    /* ===== Observations ===== */
+    .observation {
+      margin: 1.25rem 0;
+      padding-left: 3.5rem;
+      position: relative;
+    }
+    .observation::before {
+      content: attr(data-num);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      border-right: 1px solid var(--rule);
+      padding-right: 0.75rem;
+      width: 2.75rem;
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    /* ===== Sidenotes ===== */
+    .sidenote-ref {
+      font-family: var(--sans);
+      font-size: 0.7em;
+      font-weight: 600;
+      color: var(--psi);
+      cursor: pointer;
+      vertical-align: super;
+      line-height: 0;
+      padding: 0 0.1em;
+    }
+
+    .margin .sidenote {
+      font-family: var(--serif);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: var(--ink-soft);
+      padding: 0.5rem 0;
+      border-top: 1px solid var(--rule);
+      margin-bottom: 0.5rem;
+    }
+    .margin .sidenote .num {
+      font-family: var(--sans);
+      font-weight: 600;
+      color: var(--psi);
+      font-size: 0.75rem;
+      margin-right: 0.4em;
+    }
+
+    /* On mobile, sidenotes collapse into inline expandable details */
+    .margin-mobile-only { display: none; }
+    @media (max-width: 900px) {
+      .margin { display: none; }
+      .margin-mobile-only { display: block; margin: 0.5rem 0; }
+      .margin-mobile-only summary {
+        cursor: pointer;
+        color: var(--psi);
+        font-family: var(--sans);
+        font-size: 0.85rem;
+      }
+      .margin-mobile-only .body {
+        font-size: 0.95rem;
+        color: var(--ink-soft);
+        padding: 0.5rem 0 0.5rem 1rem;
+        border-left: 2px solid var(--rule);
+        margin-top: 0.5rem;
+      }
+    }
+
+    /* ===== Equations (simple inline display) ===== */
+    .eq-display {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.2rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      color: var(--ink);
+    }
+    .eq-display .sub { font-size: 0.7em; vertical-align: sub; line-height: 0; }
+    .eq-display .sup { font-size: 0.7em; vertical-align: super; line-height: 0; }
+
+    /* ===== D3 plot styling ===== */
+    .axis path, .axis line { stroke: var(--ink-soft); stroke-width: 1; }
+    .axis text { fill: var(--ink-soft); font-family: var(--mono); font-size: 10px; }
+    .psi-line { fill: none; stroke: var(--psi); stroke-width: 1.5; }
+    .rho-line { fill: none; stroke: var(--rho); stroke-width: 1.5; }
+    .rho-fill { fill: var(--rho); opacity: 0.12; }
+    .zero-line { stroke: var(--ink-faint); stroke-dasharray: 2,3; stroke-width: 0.75; }
+    .box-wall { stroke: var(--ink); stroke-width: 2; }
+
+    /* ===== Footer ===== */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--ink);
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <main class="main">
+
+    <div class="exp-header">
+      <span><strong>Exp. 01</strong> &nbsp;·&nbsp; QM Journal</span>
+      <span>Single particle · 1D · Time-independent</span>
+    </div>
+
+    <h1>The particle in a box</h1>
+    <p class="subtitle">Investigating the simplest bound state: an infinite square well of width <em>L</em>, with the particle's wavefunction forced to vanish at the walls.</p>
+
+    <div class="challenge">
+      Before reading further, drag the sliders below. <strong>Find the value of <em>n</em> that puts an internal node at exactly x = L/2.</strong> Why does only every other state do this?
+    </div>
+
+    <div class="section-label">Apparatus</div>
+
+    <div class="apparatus">
+      <div class="apparatus-meta">
+        <span>Hamiltonian: Ĥ = −½ ∂²/∂x²  (ℏ = m = 1)</span>
+        <span>Domain: x ∈ [0, L]</span>
+      </div>
+
+      <div class="plots">
+        <div>
+          <div class="plot-caption">ψ<sub>n</sub>(x) — amplitude</div>
+          <svg id="psi-plot" class="plot" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div>
+          <div class="plot-caption">|ψ<sub>n</sub>(x)|² — probability density</div>
+          <svg id="rho-plot" class="plot" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label for="n-slider">n</label>
+        <input type="range" id="n-slider" min="1" max="6" step="1" value="1">
+        <span class="value" id="n-value">1</span>
+
+        <label for="L-slider">L</label>
+        <input type="range" id="L-slider" min="0.5" max="3.0" step="0.05" value="1.0">
+        <span class="value" id="L-value">1.00</span>
+      </div>
+
+      <div class="readout">
+        <span class="label">E<sub>n</sub> =</span> <span id="energy-val">…</span>
+        <span class="label" style="margin-left: 1.5rem;">E<sub>n</sub> / E<sub>1</sub> =</span> <span id="ratio-val">…</span>
+        <span class="label" style="margin-left: 1.5rem;">internal nodes:</span> <span id="nodes-val">…</span>
+      </div>
+    </div>
+
+    <div class="section-label">Observations</div>
+
+    <div class="observation" data-num="Obs. 1">
+      <p><strong>Quantization is the price of boundary conditions.</strong> The walls demand ψ(0) = ψ(L) = 0. Only sine waves that fit a half-integer number of wavelengths into the box satisfy that, which selects a discrete set of allowed states labeled by <em>n</em> = 1, 2, 3, ….<span class="sidenote-ref" data-note="1">¹</span></p>
+      <details class="margin-mobile-only">
+        <summary>Note 1 — why sines, not cosines</summary>
+        <div class="body">Cosines fail the left boundary: cos(0) = 1, not 0. Inside an infinite well the most general solution is a sum of sine and cosine; the cosine coefficient is killed by ψ(0) = 0.</div>
+      </details>
+    </div>
+
+    <div class="observation" data-num="Obs. 2">
+      <p>The energy is <span class="eq-display" style="display: inline; font-size: 1rem; margin: 0;">E<span class="sub">n</span> = n<span class="sup">2</span> π<span class="sup">2</span> ℏ<span class="sup">2</span> / (2 m L<span class="sup">2</span>)</span>. Two scalings worth feeling in the apparatus: <strong>E ∝ n²</strong> (states get further apart, not closer) and <strong>E ∝ 1/L²</strong> (squeezing the box costs kinetic energy)<span class="sidenote-ref" data-note="2">²</span>. The right-hand readout shows the ratio E<sub>n</sub>/E<sub>1</sub> — confirm by hand that it equals n² for every state.</p>
+      <details class="margin-mobile-only">
+        <summary>Note 2 — why atoms have a size</summary>
+        <div class="body">This 1/L² scaling is essentially why atoms don't collapse. Confining an electron near the nucleus increases kinetic energy faster than the Coulomb attraction lowers potential energy. The balance sets the Bohr radius.</div>
+      </details>
+    </div>
+
+    <div class="observation" data-num="Obs. 3">
+      <p><strong>The node theorem.</strong> The state <em>n</em> has exactly <em>n</em> − 1 internal zero crossings. Count them in the left plot as you crank <em>n</em>. This isn't a quirk of the square well — it holds for every 1D bound-state problem<span class="sidenote-ref" data-note="3">³</span>. The number of nodes is a topological label for the energy level.</p>
+      <details class="margin-mobile-only">
+        <summary>Note 3 — the node theorem in general</summary>
+        <div class="body">For any 1D Schrödinger equation with a confining potential V(x), the n-th bound state has n−1 nodes. The harmonic oscillator (Exp. 02, coming soon) is the next concrete example.</div>
+      </details>
+    </div>
+
+    <div class="observation" data-num="Obs. 4">
+      <p><strong>Phase is invisible.</strong> ψ goes negative on alternate humps; |ψ|² never does. Squaring kills the sign. A single measurement of position can never reveal where ψ was negative — that information only matters when two wavefunctions interfere. The apparatus shows this directly: drag <em>n</em> across odd→even and watch the left plot flip sign while the right plot is unchanged in shape.</p>
+    </div>
+
+    <div class="section-label">Open questions</div>
+
+    <p>Some things I'd want to investigate in later entries:</p>
+    <ul>
+      <li>What happens if the walls aren't infinitely high? The finite well admits <em>tunneling</em> — the particle has nonzero probability of being found outside the box. (Exp. 03 candidate.)</li>
+      <li>What is the time evolution of a state that is <em>not</em> an eigenstate — a superposition like ψ₁ + ψ₂? The energy levels suggest a beat frequency proportional to (E₂ − E₁).</li>
+      <li>The momentum eigenstates of this Hamiltonian are not the energy eigenstates. What does ⟨p²⟩ look like for ψₙ, and does it satisfy ⟨p²⟩/2m = E?</li>
+    </ul>
+
+    <div class="footer">
+      <span>QM Journal · Exp. 01 · Particle in a Box</span>
+      <span id="footer-date">May 2026</span>
+    </div>
+
+  </main>
+
+  <aside class="margin" aria-label="Sidenotes">
+    <div class="sidenote"><span class="num">1.</span> Cosines fail the left boundary: cos(0) = 1, not 0. Inside an infinite well the most general solution is a sum of sine and cosine; the cosine coefficient is killed by ψ(0) = 0.</div>
+    <div class="sidenote"><span class="num">2.</span> This 1/L² scaling is essentially why atoms don't collapse. Confining an electron near the nucleus increases kinetic energy faster than the Coulomb attraction lowers potential energy. The balance sets the Bohr radius.</div>
+    <div class="sidenote"><span class="num">3.</span> For any 1D Schrödinger equation with a confining potential V(x), the n-th bound state has n−1 nodes. The harmonic oscillator (Exp. 02, coming soon) is the next concrete example.</div>
+  </aside>
+</div>
+
+<script src="particle_box.js"></script>
+<script>
+  // ===== embind helper =====
+  function vecToArray(vec) {
+    const arr = new Array(vec.size());
+    for (let i = 0; i < vec.size(); ++i) arr[i] = vec.get(i);
+    vec.delete();
+    return arr;
+  }
+
+  // ===== plot setup =====
+  const N_POINTS = 300;
+  const W = 500, H = 320;
+  const margin = { top: 16, right: 16, bottom: 36, left: 44 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
+
+  function makePlot(svgId, yLabel, lineClass, fillClass) {
+    const svg = d3.select(svgId);
+    const g = svg.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const xScale = d3.scaleLinear().range([0, innerW]);
+    const yScale = d3.scaleLinear().range([innerH, 0]);
+
+    const xAxis = g.append("g").attr("class", "axis")
+      .attr("transform", `translate(0,${innerH})`);
+    const yAxis = g.append("g").attr("class", "axis");
+
+    // axis labels
+    g.append("text")
+      .attr("x", innerW / 2).attr("y", innerH + 30)
+      .attr("text-anchor", "middle")
+      .attr("fill", "var(--ink-soft)")
+      .style("font-family", "var(--mono)")
+      .style("font-size", "10px")
+      .text("x");
+
+    g.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -innerH / 2).attr("y", -30)
+      .attr("text-anchor", "middle")
+      .attr("fill", "var(--ink-soft)")
+      .style("font-family", "var(--mono)")
+      .style("font-size", "10px")
+      .text(yLabel);
+
+    const zeroLine = g.append("line").attr("class", "zero-line")
+      .attr("x1", 0).attr("x2", innerW);
+
+    // left & right walls (visual hint of the box)
+    const leftWall = g.append("line").attr("class", "box-wall")
+      .attr("y1", 0).attr("y2", innerH);
+    const rightWall = g.append("line").attr("class", "box-wall")
+      .attr("y1", 0).attr("y2", innerH);
+
+    const fill = fillClass ? g.append("path").attr("class", fillClass) : null;
+    const path = g.append("path").attr("class", lineClass);
+
+    return { g, xScale, yScale, xAxis, yAxis, zeroLine, leftWall, rightWall, path, fill };
+  }
+
+  const psiPlot = makePlot("#psi-plot", "ψₙ(x)", "psi-line", null);
+  const rhoPlot = makePlot("#rho-plot", "|ψₙ(x)|²", "rho-line", "rho-fill");
+
+  // ===== count internal nodes (sign changes, excluding endpoints) =====
+  function countInternalNodes(arr) {
+    let count = 0;
+    // skip first and last to avoid counting boundary zeros
+    let prev = arr[1];
+    for (let i = 2; i < arr.length - 1; ++i) {
+      if (Math.sign(arr[i]) !== Math.sign(prev) && arr[i] !== 0) count++;
+      if (arr[i] !== 0) prev = arr[i];
+    }
+    return count;
+  }
+
+  // ===== update =====
+  let Module = null;
+  let E1_cache = null;  // cached ground state energy at current L
+
+  function update() {
+    if (!Module) return;
+    const n = +document.getElementById("n-slider").value;
+    const L = +document.getElementById("L-slider").value;
+
+    document.getElementById("n-value").textContent = n;
+    document.getElementById("L-value").textContent = L.toFixed(2);
+
+    const box = new Module.ParticleInBox(L, n);
+    const psi = vecToArray(box.wavefunction(N_POINTS));
+    const rho = vecToArray(box.probabilityDensity(N_POINTS));
+    const E = box.energy();
+    box.delete();
+
+    // ground state energy for the same L, for ratio readout
+    const ground = new Module.ParticleInBox(L, 1);
+    const E1 = ground.energy();
+    ground.delete();
+
+    document.getElementById("energy-val").textContent = E.toFixed(4);
+    document.getElementById("ratio-val").textContent = (E / E1).toFixed(2);
+    document.getElementById("nodes-val").textContent = countInternalNodes(psi);
+
+    const xs = Array.from({length: N_POINTS}, (_, i) => i * L / (N_POINTS - 1));
+    drawCurve(psiPlot, xs, psi, L, true);
+    drawCurve(rhoPlot, xs, rho, L, false);
+  }
+
+  function drawCurve(plot, xs, ys, L, symmetric) {
+    // small padding so curve doesn't touch the walls
+    plot.xScale.domain([0, L]);
+
+    if (symmetric) {
+      const yMax = d3.max(ys.map(Math.abs));
+      plot.yScale.domain([-yMax * 1.15, yMax * 1.15]);
+    } else {
+      plot.yScale.domain([0, d3.max(ys) * 1.15]);
+    }
+
+    plot.xAxis.call(d3.axisBottom(plot.xScale).ticks(5).tickSizeOuter(0));
+    plot.yAxis.call(d3.axisLeft(plot.yScale).ticks(5).tickSizeOuter(0));
+
+    plot.zeroLine
+      .attr("y1", plot.yScale(0))
+      .attr("y2", plot.yScale(0));
+
+    plot.leftWall
+      .attr("x1", plot.xScale(0))
+      .attr("x2", plot.xScale(0));
+    plot.rightWall
+      .attr("x1", plot.xScale(L))
+      .attr("x2", plot.xScale(L));
+
+    const line = d3.line()
+      .x((_, i) => plot.xScale(xs[i]))
+      .y(d => plot.yScale(d));
+    plot.path.attr("d", line(ys));
+
+    if (plot.fill) {
+      const area = d3.area()
+        .x((_, i) => plot.xScale(xs[i]))
+        .y0(plot.yScale(0))
+        .y1(d => plot.yScale(d));
+      plot.fill.attr("d", area(ys));
+    }
+  }
+
+  document.getElementById("n-slider").addEventListener("input", update);
+  document.getElementById("L-slider").addEventListener("input", update);
+
+  createParticleBoxModule().then((mod) => {
+    Module = mod;
+    update();
+  });
+</script>
+
+</body>
+</html>

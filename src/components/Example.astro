@@ -1,0 +1,40 @@
+---
+const { n, title } = Astro.props;
+---
+<div class="example">
+  <div class="example-tag-wrapper">
+    <span class="example-tag">Zum Beispiel {n}</span>
+  </div>
+  {title && <p class="example-title">{title}</p>}
+  <div class="example-body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .example {
+    margin: 2rem 0;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--highlight-example);
+  }
+  .example-tag-wrapper {
+    margin: 0 0 0.75rem -1.25rem;
+  }
+  .example-tag {
+    display: inline-block;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--highlight-example-dark);
+    background: var(--highlight-example);
+    padding: 0.15rem 0.6rem;
+    border-radius: 2px;
+    letter-spacing: 0.02em;
+  }
+  .example-title {
+    font-style: italic;
+    margin: 0 0 0.75rem;
+    color: var(--ink-soft);
+  }
+  .example-body :global(p:last-child) { margin-bottom: 0; }
+</style>

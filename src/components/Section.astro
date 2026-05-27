@@ -1,0 +1,21 @@
+---
+const { letter, title } = Astro.props;
+---
+<div class="section-heading">
+  <span class="section-highlight">{letter}. {title}</span>
+</div>
+
+<style>
+  .section-heading {
+    margin: 3rem 0 1rem;
+  }
+  .section-highlight {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--highlight-section-dark);
+    background: linear-gradient(transparent 55%, var(--highlight-section) 55%);
+    padding: 0 0.3em;
+    /* the gradient trick fakes a highlighter pen drawing over the bottom half */
+  }
+</style>

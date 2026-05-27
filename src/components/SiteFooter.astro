@@ -1,0 +1,122 @@
+---
+const { lastUpdated } = Astro.props;
+
+const currentYear = new Date().getFullYear();
+
+const formattedDate = lastUpdated
+  ? new Date(lastUpdated).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  : null;
+---
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-left">
+      <div class="site-footer-title">QM Journal</div>
+      <div class="site-footer-sub">
+        A working notebook for learning quantum mechanics by building it.
+      </div>
+      {formattedDate && (
+        <div class="site-footer-meta">
+          Last updated: <span>{formattedDate}</span>
+        </div>
+      )}
+    </div>
+
+    <div class="site-footer-right">
+      <a href="mailto:your.email@example.com" class="site-footer-link">
+        Email
+      </a>
+      <a href="https://github.com/yourusername/qm-journal" class="site-footer-link" target="_blank" rel="noopener">
+        GitHub
+      </a>
+      <a href="https://linkedin.com/in/yourusername" class="site-footer-link" target="_blank" rel="noopener">
+        LinkedIn
+      </a>
+    </div>
+  </div>
+
+  <div class="site-footer-bottom">
+    © {currentYear} Kipruto · Built with Astro, C++, and WebAssembly
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 5rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--ink);
+    font-family: var(--sans);
+    color: var(--ink-soft);
+  }
+
+  .site-footer-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .site-footer-inner {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  .site-footer-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 1.3rem;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+
+  .site-footer-sub {
+    font-style: italic;
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.75rem;
+  }
+
+  .site-footer-meta {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+  }
+  .site-footer-meta span { color: var(--ink-soft); }
+
+  .site-footer-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: flex-start;
+  }
+  @media (max-width: 600px) {
+    .site-footer-right { flex-direction: row; gap: 1.25rem; }
+  }
+
+  .site-footer-link {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .site-footer-link:hover {
+    color: var(--psi);
+    border-color: var(--psi);
+  }
+
+  .site-footer-bottom {
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+  }
+</style>

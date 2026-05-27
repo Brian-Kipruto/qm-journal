@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+
+const { src, alt, caption, source, width = "full" } = Astro.props;
+// `width` controls the figure's max-width: "full" (default), "wide", or "narrow"
+---
+
+<figure class={`figure figure-${width}`}>
+  <div class="figure-image-wrap">
+    <Image src={src} alt={alt} />
+  </div>
+  {(caption || source) && (
+    <figcaption class="figure-caption">
+      {caption && <span class="figure-caption-text">{caption}</span>}
+      {source && <span class="figure-source">— {source}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .figure {
+    margin: 1.75rem auto;
+    display: block;
+  }
+  .figure-full { width: 100%; }
+  .figure-wide { max-width: 110%; margin-left: -5%; margin-right: -5%; }
+  /* Wide pushes slightly past the body column on desktop — useful for composites */
+  .figure-narrow { max-width: 70%; margin-left: auto; margin-right: auto; }
+
+  .figure-image-wrap {
+    background: #fcfaf4;
+    border: 1px solid var(--rule);
+    padding: 0.5rem;
+    display: block;
+  }
+  .figure-image-wrap :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .figure-caption {
+    margin-top: 0.6rem;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .figure-caption-text { font-style: italic; }
+  .figure-source {
+    color: var(--ink-faint);
+    margin-left: 0.4em;
+  }
+
+  @media (max-width: 700px) {
+    .figure-wide {
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+</style>

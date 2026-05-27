@@ -1,0 +1,333 @@
+---
+// Drag a point on the complex plane. See ψ, ψ*, and ψ*ψ.
+// Demonstrates *why* multiplying by the conjugate kills the imaginary part.
+---
+
+<div class="complex-explorer" data-widget="complex-explorer">
+  <div class="ce-layout">
+    <div class="ce-plot-wrapper">
+      <svg class="ce-plot" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="ce-instruction">Drag the blue point</div>
+    </div>
+
+    <div class="ce-readout">
+      <div class="ce-row">
+        <span class="ce-label ce-psi">ψ</span>
+        <span class="ce-eq">=</span>
+        <span class="ce-value" data-display="psi">…</span>
+      </div>
+      <div class="ce-row">
+        <span class="ce-label ce-psi-star">ψ*</span>
+        <span class="ce-eq">=</span>
+        <span class="ce-value" data-display="psi-star">…</span>
+      </div>
+      <div class="ce-divider"></div>
+      <div class="ce-row">
+        <span class="ce-label">ψ* · ψ</span>
+        <span class="ce-eq">=</span>
+        <span class="ce-value ce-result" data-display="product">…</span>
+      </div>
+      <div class="ce-row ce-imag-row">
+        <span class="ce-label-faint">imag part:</span>
+        <span class="ce-value-faint" data-display="imag-part">…</span>
+      </div>
+      <div class="ce-row">
+        <span class="ce-label">|ψ|²</span>
+        <span class="ce-eq">=</span>
+        <span class="ce-value ce-result" data-display="mag-sq">…</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="ce-note">
+    Notice how <strong>ψ* · ψ</strong> always equals <strong>|ψ|²</strong> exactly, and the imaginary part is always zero — no matter where you drag ψ. That's why the conjugate trick works.
+  </p>
+</div>
+
+<style>
+  .complex-explorer { font-family: var(--serif); }
+
+  .ce-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  @media (max-width: 700px) {
+    .ce-layout { grid-template-columns: 1fr; }
+  }
+
+  .ce-plot-wrapper { position: relative; }
+  .ce-plot {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #fcfaf4;
+    border: 1px solid var(--rule);
+    cursor: grab;
+  }
+  .ce-plot:active { cursor: grabbing; }
+
+  .ce-instruction {
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+
+  .ce-readout {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .ce-row {
+    display: grid;
+    grid-template-columns: 4rem auto 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+  .ce-label { font-weight: 600; color: var(--ink); }
+  .ce-label-faint { font-size: 0.8rem; color: var(--ink-faint); }
+  .ce-psi { color: var(--psi); }
+  .ce-psi-star { color: var(--rho); }
+  .ce-eq { color: var(--ink-faint); }
+  .ce-value { color: var(--ink); }
+  .ce-value-faint { font-size: 0.8rem; color: var(--ink-faint); }
+  .ce-result { font-weight: 600; }
+  .ce-divider { height: 1px; background: var(--rule); margin: 0.25rem 0; }
+  .ce-imag-row { margin-top: -0.25rem; }
+
+  .ce-note {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--rule);
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+</style>
+
+<script>
+  function loadComplex() {
+    return new Promise((resolve, reject) => {
+      if (window.createComplexNumberModule) {
+        return resolve(window.createComplexNumberModule());
+      }
+      const s = document.createElement('script');
+      s.src = '/complex_number.js';
+      s.onload = () => resolve(window.createComplexNumberModule());
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  function initWidget(root, Module) {
+    const svg = root.querySelector('.ce-plot');
+    const W = 400, H = 400;
+    const cx = W / 2, cy = H / 2;
+    const scale = 80;  // pixels per unit
+
+    // ===== Build SVG axes and labels =====
+    const NS = 'http://www.w3.org/2000/svg';
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS(NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      return el;
+    }
+
+    // Grid
+    for (let i = -2; i <= 2; i++) {
+      if (i === 0) continue;
+      svg.appendChild(svgEl('line', {
+        x1: cx + i * scale, y1: 0, x2: cx + i * scale, y2: H,
+        stroke: '#e8e0d0', 'stroke-width': 0.5
+      }));
+      svg.appendChild(svgEl('line', {
+        x1: 0, y1: cy + i * scale, x2: W, y2: cy + i * scale,
+        stroke: '#e8e0d0', 'stroke-width': 0.5
+      }));
+    }
+
+    // Axes
+    svg.appendChild(svgEl('line', {
+      x1: 0, y1: cy, x2: W, y2: cy,
+      stroke: '#666', 'stroke-width': 1
+    }));
+    svg.appendChild(svgEl('line', {
+      x1: cx, y1: 0, x2: cx, y2: H,
+      stroke: '#666', 'stroke-width': 1
+    }));
+
+    // Axis labels
+    const realLabel = svgEl('text', {
+      x: W - 12, y: cy - 6, 'text-anchor': 'end',
+      'font-family': 'JetBrains Mono, monospace', 'font-size': '11', fill: '#666'
+    });
+    realLabel.textContent = 'Real';
+    svg.appendChild(realLabel);
+
+    const imagLabel = svgEl('text', {
+      x: cx + 6, y: 14,
+      'font-family': 'JetBrains Mono, monospace', 'font-size': '11', fill: '#666'
+    });
+    imagLabel.textContent = 'Imaginary';
+    svg.appendChild(imagLabel);
+
+    // Origin label
+    const origin = svgEl('text', {
+      x: cx - 6, y: cy + 14, 'text-anchor': 'end',
+      'font-family': 'JetBrains Mono, monospace', 'font-size': '10', fill: '#999'
+    });
+    origin.textContent = '0';
+    svg.appendChild(origin);
+
+    // Line from origin to ψ
+    const psiLine = svgEl('line', {
+      x1: cx, y1: cy, stroke: '#2a4d8f', 'stroke-width': 2
+    });
+    svg.appendChild(psiLine);
+
+    // Line from origin to ψ*
+    const psiStarLine = svgEl('line', {
+      x1: cx, y1: cy, stroke: '#993d3d', 'stroke-width': 2,
+      'stroke-dasharray': '4,3'
+    });
+    svg.appendChild(psiStarLine);
+
+    // ψ point (draggable)
+    const psiPoint = svgEl('circle', {
+      r: 8, fill: '#2a4d8f', stroke: '#fff', 'stroke-width': 2,
+      cursor: 'grab'
+    });
+    svg.appendChild(psiPoint);
+
+    // ψ* point (mirror)
+    const psiStarPoint = svgEl('circle', {
+      r: 6, fill: '#993d3d', stroke: '#fff', 'stroke-width': 2
+    });
+    svg.appendChild(psiStarPoint);
+
+    // Labels for ψ and ψ*
+    const psiLabel = svgEl('text', {
+      'font-family': 'EB Garamond, serif', 'font-size': '18',
+      fill: '#2a4d8f', 'font-weight': '600'
+    });
+    psiLabel.textContent = 'ψ';
+    svg.appendChild(psiLabel);
+
+    const psiStarLabel = svgEl('text', {
+      'font-family': 'EB Garamond, serif', 'font-size': '16',
+      fill: '#993d3d', 'font-weight': '600'
+    });
+    psiStarLabel.textContent = 'ψ*';
+    svg.appendChild(psiStarLabel);
+
+    // ===== State + update =====
+    let psiRe = 1.2, psiIm = 0.8;
+
+    function update() {
+      // Plot positions: SVG y is inverted
+      const psiX = cx + psiRe * scale;
+      const psiY = cy - psiIm * scale;
+      const psiStarY = cy + psiIm * scale;  // conjugate flips y
+
+      psiPoint.setAttribute('cx', psiX);
+      psiPoint.setAttribute('cy', psiY);
+      psiStarPoint.setAttribute('cx', psiX);
+      psiStarPoint.setAttribute('cy', psiStarY);
+
+      psiLine.setAttribute('x2', psiX);
+      psiLine.setAttribute('y2', psiY);
+      psiStarLine.setAttribute('x2', psiX);
+      psiStarLine.setAttribute('y2', psiStarY);
+
+      psiLabel.setAttribute('x', psiX + 12);
+      psiLabel.setAttribute('y', psiY - 8);
+      psiStarLabel.setAttribute('x', psiX + 12);
+      psiStarLabel.setAttribute('y', psiStarY + 16);
+
+      // Compute via the C++ module
+      const psi = new Module.ComplexNumber(psiRe, psiIm);
+      const psiStar = psi.conjugate();
+      const product = psiStar.multiply(psi);
+      const magSq = psi.magnitudeSquared();
+
+      const fmt = (a, b) => {
+        const sign = b >= 0 ? '+' : '−';
+        return `${a.toFixed(2)} ${sign} ${Math.abs(b).toFixed(2)}i`;
+      };
+
+      root.querySelector('[data-display="psi"]').textContent =
+        fmt(psi.real(), psi.imag());
+      root.querySelector('[data-display="psi-star"]').textContent =
+        fmt(psiStar.real(), psiStar.imag());
+      root.querySelector('[data-display="product"]').textContent =
+        fmt(product.real(), product.imag());
+      root.querySelector('[data-display="imag-part"]').textContent =
+        product.imag().toFixed(4) + ' (≈ 0)';
+      root.querySelector('[data-display="mag-sq"]').textContent =
+        magSq.toFixed(4);
+
+      psi.delete();
+      psiStar.delete();
+      product.delete();
+    }
+
+    // ===== Drag handling =====
+    let dragging = false;
+
+    function pointFromEvent(e) {
+      const rect = svg.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const xRatio = (clientX - rect.left) / rect.width;
+      const yRatio = (clientY - rect.top) / rect.height;
+      // Convert to viewBox coordinates then to math coordinates
+      const svgX = xRatio * W;
+      const svgY = yRatio * H;
+      psiRe = (svgX - cx) / scale;
+      psiIm = -(svgY - cy) / scale;  // flip y
+      // Clamp to visible range
+      psiRe = Math.max(-2.2, Math.min(2.2, psiRe));
+      psiIm = Math.max(-2.2, Math.min(2.2, psiIm));
+    }
+
+    svg.addEventListener('mousedown', (e) => {
+      dragging = true;
+      pointFromEvent(e);
+      update();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      pointFromEvent(e);
+      update();
+    });
+    window.addEventListener('mouseup', () => { dragging = false; });
+
+    // Touch support
+    svg.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      dragging = true;
+      pointFromEvent(e);
+      update();
+    }, { passive: false });
+    window.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      pointFromEvent(e);
+      update();
+    }, { passive: false });
+    window.addEventListener('touchend', () => { dragging = false; });
+
+    update();
+  }
+
+  loadComplex().then((Module) => {
+    document.querySelectorAll('[data-widget="complex-explorer"]').forEach((root) => {
+      initWidget(root, Module);
+    });
+  });
+</script>

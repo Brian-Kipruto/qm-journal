@@ -1,0 +1,27 @@
+---
+const { title } = Astro.props;
+---
+<aside class="aside">
+  {title && <div class="aside-title">{title}</div>}
+  <div class="aside-body"><slot /></div>
+</aside>
+
+<style>
+  .aside {
+    background: var(--aside-bg);
+    border-left: 3px solid var(--aside-border);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .aside-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--aside-border);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+  .aside-body :global(p:last-child) { margin-bottom: 0; }
+  .aside-body :global(ul), .aside-body :global(ol) { margin-bottom: 0; }
+</style>

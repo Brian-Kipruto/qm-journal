@@ -1,0 +1,245 @@
+---
+layout: ../layouts/Lecture.astro
+title: Wave functions, Normalization, Expected values
+subtitle: What ψ is, why we square it, and how to get real numbers out of complex math.
+lectureNumber: "00"
+date: 2026-05-23
+tags: [Foundations, Wave function, Probability]
+source: Mr Mangala's Lecture 11
+---
+
+import Section from '../components/Section.astro';
+import Example from '../components/Example.astro';
+import Aside from '../components/Aside.astro';
+import KeyResult from '../components/KeyResult.astro';
+import Apparatus from '../components/Apparatus.astro';
+import ComplexExplorer from '../components/ComplexExplorer.astro';
+import ValidityTester from '../components/ValidityTester.astro';
+import WikiLink from '../components/WikiLink.astro';
+import Figure from '../components/Figure.astro';
+import probDensity from '../assets/lecture-00/probability-density.png';
+
+This lecture starts by drawing a parallel between light and electrons. For light waves, the intensity (which tells you the number of photons in a given volume) is proportional to the amplitude of the electric field squared, $E^2$.
+
+So an electron is a quantum particle — it's both a particle and a wave. Because of this double behaviour, we describe them using a mathematical tool known as the **wave function**, represented by the greek letter psi ($\psi$).
+
+But what is the physical variable that is actually *waving* in an electron wave? It is not a physical wave like a ripple in water — instead it's a **probability amplitude**. In order to find the actual probability of locating the electron in a specific tiny spot (like a small volume element $dV$ or a small 1-d length $dx$), you take the absolute square of that wave function, $|\psi|^2$. This squared value is known as the **probability density**.
+
+In a nutshell, the wave function itself ($\psi$) is just a *complex-valued mathematical description of a quantum particle that acts as a probability amplitude*, but when you square it ($|\psi|^2$) it tells you exactly where to find the particle in a specific location.
+
+<Figure
+  src={probDensity}
+  alt="Wave function ψ and probability density |ψ|² side by side, with an interference pattern strip showing real-world bright and dark bands."
+  caption="The wave function ψ, its squared probability density |ψ|², and the resulting interference pattern."
+  source="Mr Mangala's lecture slide"
+  width="wide"
+/>
+
+### The two plots, side by side
+
+The wave function ψ oscillates above and below the center line — it has both positive and negative values. Because it can be negative, ψ itself does not represent a physical quantity like count or amount. It represents probability amplitude.
+
+The probability density $|\psi|^2$ is what you get when you square it. All values are now positive — squaring the negative parts of ψ makes them positive. This is the graph that tells you the probability of finding the particle at a specific location. **The higher the peak, the more likely you are to find the particle there.** The valleys that touch zero are places you will *never* find the particle.
+
+The interference pattern from a double-slit experiment is the real-world visualization of this. Bright bands correspond to the peaks in $|\psi|^2$ — constructive interference, high probability of finding particles. Dark bands correspond to zeros — destructive interference, near-zero probability.
+
+---
+
+So, how do wave functions actually work?
+
+Because electron waves can be described using mathematical equations that include imaginary numbers (using $i$), $\psi$ itself is always a **complex** function.
+
+<Aside title="Imaginary numbers">
+Imaginary numbers, simply put, are numbers that give a negative result when you square them. In standard math, squaring a number — whether positive or negative — always gives you a positive result. To solve problems where you need the square root of a negative number, mathematicians created the unit $i$.
+
+**Definition:** $i = \sqrt{-1}$
+**The rule:** $i^2 = -1$
+
+Think of them as not "fake" but an *extra dimension*. While real numbers live on the left-to-right line, imaginary numbers live on a vertical line. Together, they create **complex numbers**, which engineers and scientists use to describe things that rotate or wave — like electricity and sound.
+</Aside>
+
+However, in the real world, you cannot have an *imaginary* probability of finding an electron. The probability has to be a real, measurable function.
+
+In order to turn that complex mathematical wave into a real-world probability density $|\psi|^2$, we use a tool called the **complex conjugate** ($\psi^*$).
+
+- To find a complex conjugate, you simply take your wave function and change every $i$ to $-i$.
+- When you multiply the original wave function by its complex conjugate ($\psi^* \cdot \psi$), the imaginary parts completely cancel out mathematically. You're left with $a^2 + b^2$, which is always a real number.
+
+<Apparatus title="The complex conjugate, made tactile" meta="Widget 1 of 2">
+<ComplexExplorer />
+</Apparatus>
+
+<Section letter="A" title="Rules of a valid wave function" />
+
+Because the resulting number (probability density) represents a real physical quantity — the probability of finding the particle — a valid wave function is bound by some strict real-world constraints:
+
+1. **$\psi(x)$ must be finite, continuous, and single-valued.** You cannot have a broken wave, an infinite wave, or a wave that gives two different probabilities for the exact same spot. The probability has to be perfectly well defined everywhere.
+
+2. **The derivative $d\psi/dx$ must also be finite, continuous, and single-valued.** In QM, the slope (derivative) of the wave is directly tied to the particle's classical momentum, so it has to be a smooth continuous value.
+
+3. **The sign does not matter.** Whether the wave dips into negative numbers has no physical significance, because we always take its absolute square to find the probability. The negative sign disappears.
+
+<Example n={1}>
+Which of the following hypothetical wave functions $\psi(x)$ is acceptable?
+
+<Apparatus title="Click each case to test it" meta="Widget 2 of 2">
+<ValidityTester />
+</Apparatus>
+
+- **(a)** is not acceptable because the wave function is not continuous at $x = 0$ and the derivative $d\psi/dx$ is not defined there.
+- **(b)** is acceptable as both $\psi(x)$ and $d\psi/dx$ are continuous everywhere.
+- **(c)** is not acceptable as $d\psi/dx$ is not continuous at $x = 0$.
+</Example>
+
+<Example n={2}>
+Which of these wave functions correspond to a particle more likely to be found on the left side?
+
+The answer is **none of them.**
+
+- (a) is clearly completely symmetric.
+- For (b) & (c): in as much as (b) stays positive on the left but dips negative on the right, once you square the negative dip on both, the probability becomes completely symmetric. The sign doesn't matter — only the magnitude squared does.
+</Example>
+
+<Example n={3} title="The free particle">
+Consider the wave function for a free particle, $\psi(x) = Ae^{ikx}$. At what value of $x$ is the particle most likely to be found at a given time?
+
+This is basically asking for the probability density, and to find that we multiply the wave function by its complex conjugate (simply turning the imaginary numbers into negatives):
+
+$$|\psi(x)|^2 = \psi^*(x) \cdot \psi(x)$$
+
+$$\psi(x) = Ae^{ikx}$$
+$$\psi^*(x) = Ae^{-ikx}$$
+$$|\psi(x)|^2 = (Ae^{-ikx})(Ae^{ikx})$$
+
+Since $e^{-ikx} \cdot e^{ikx} = e^0 = 1$, we have:
+
+$$|\psi(x)|^2 = |A|^2$$
+
+The probability density is a **constant value $|A|^2$** — meaning the particle is equally likely to be found at any value of $x$. There is no specific most likely position.
+
+In physics terms, we say the particle is completely **delocalized**. Because we know its momentum exactly, the Heisenberg Uncertainty Principle tells us we have maximum uncertainty about its position.
+</Example>
+
+<Example n={4} title="A free electron, numerically">
+A free electron has wave function $\psi(x) = Ae^{i(2.4 \times 10^{11})x}$, where $x$ is in meters. Find:
+
+**1. Its de Broglie wavelength.**
+
+The wave number $k = 2.4 \times 10^{11}$ m⁻¹. It's related to the de Broglie wavelength by $k = 2\pi / \lambda$, so:
+
+$$\lambda = \frac{2\pi}{k} = \frac{2\pi}{2.4 \times 10^{11}} \approx 2.62 \times 10^{-11} \text{ m}$$
+
+**2. Its momentum.**
+
+Momentum is related to wave number by $p = \hbar k$:
+
+$$p = (1.054 \times 10^{-34} \text{ J·s}) \times (2.4 \times 10^{11} \text{ m}^{-1}) \approx 2.53 \times 10^{-23} \text{ kg·m/s}$$
+
+**3. Its kinetic energy, in electron volts.**
+
+For a free electron, $K = p^2 / (2m_e)$:
+
+$$K = \frac{(2.53 \times 10^{-23})^2}{2 \times (9.11 \times 10^{-31})} \approx 3.51 \times 10^{-16} \text{ J}$$
+
+Converting to eV (using $1 \text{ J} = 6.242 \times 10^{18}$ eV):
+
+$$K \approx 2200 \text{ eV}$$
+</Example>
+
+<Section letter="B" title="Normalisation Conditions" />
+
+Above, we established that the absolute square of the wave function $|\psi(x)|^2$ gives us the probability of finding the particle at a specific spot. Because the particle definitely exists *somewhere*, if you add up the probabilities for every single possible location in the universe — from $-\infty$ to $+\infty$ — the total must equal exactly **1** (or 100%).
+
+Mathematically, adding up everything means taking an integral. This gives us the master equation for normalization:
+
+$$\int_{-\infty}^{+\infty} |\psi(x)|^2 \, dx = 1$$
+
+To see the math in action, let's imagine a particle trapped in a box of width $L$ (the famous **particle in a box**, which we'll meet next).
+
+Its wave function starts as a standard sine wave:
+
+$$\psi(x) = A \sin\left(\frac{n\pi x}{L}\right)$$
+
+where $A$ is just an unknown constant. To normalize this wave (i.e. make sure its total probability = 1):
+
+**Step 1.** Plug the equation into the normalization integral:
+
+$$\int_0^L \left(A \sin\left(\frac{n\pi x}{L}\right)\right)^2 dx = 1$$
+
+(We use bounds $0$ to $L$ because the particle is bounded by the box.)
+
+**Step 2.** $A$ is a constant, so square it and pull it outside the integral:
+
+$$A^2 \int_0^L \sin^2\left(\frac{n\pi x}{L}\right) dx = 1$$
+
+**Step 3.** Integrating $\sin^2$ directly is hard. Use the trig identity $\sin^2(\theta) = \frac{1 - \cos(2\theta)}{2}$:
+
+$$A^2 \int_0^L \frac{1 - \cos\left(\frac{2n\pi x}{L}\right)}{2} dx = 1$$
+
+**Step 4.** Pull out the $\frac{1}{2}$ and split the integral:
+
+$$\frac{A^2}{2} \left[\int_0^L 1 \, dx - \int_0^L \cos\left(\frac{2n\pi x}{L}\right) dx\right] = 1$$
+
+The first integral is just $L$. The second integral is the average of a cosine wave over a whole number of full wavelengths — the positive humps cancel the negative dips exactly, so it equals $0$.
+
+$$\frac{A^2}{2}[L - 0] = 1$$
+
+**Step 5.** Solve for $A$:
+
+$$A^2 = \frac{2}{L} \quad \Rightarrow \quad A = \sqrt{\frac{2}{L}}$$
+
+**Step 6.** Plug it back in:
+
+<KeyResult>
+$$\psi(x) = \sqrt{\frac{2}{L}} \sin\left(\frac{n\pi x}{L}\right)$$
+The normalized wave function for a particle in a box.
+</KeyResult>
+
+<Section letter="C" title="Expectation Value ⟨x⟩" />
+
+The expectation value answers a specific question: *if I were to measure the position of this exact particle thousands of times, what would the average result be?*
+
+To find this mathematically, we use another integral. You take the wave function, multiply it by its complex conjugate ($\psi^*$), but **sandwich an $x$ right in the middle**:
+
+$$\langle x \rangle = \int_{-\infty}^{+\infty} \psi^* \, x \, \psi \, dx$$
+
+Let's apply this to the normalized wave function we just derived:
+
+$$\psi(x) = \sqrt{\frac{2}{L}} \sin\left(\frac{n\pi x}{L}\right)$$
+
+**Step 1.** Because this wave function doesn't have imaginary numbers, its complex conjugate is exactly the same as the original. With bounds $0$ to $L$:
+
+$$\langle x \rangle = \int_0^L \sqrt{\frac{2}{L}} \sin\left(\frac{n\pi x}{L}\right) \cdot x \cdot \sqrt{\frac{2}{L}} \sin\left(\frac{n\pi x}{L}\right) dx$$
+
+**Step 2.** Simplify — multiply the two $\sqrt{2/L}$ terms to get $2/L$, pull it outside, combine the sines into $\sin^2$:
+
+$$\langle x \rangle = \frac{2}{L} \int_0^L x \sin^2\left(\frac{n\pi x}{L}\right) dx$$
+
+**Step 3.** Use the same trig identity as before:
+
+$$\langle x \rangle = \frac{2}{L} \int_0^L x \cdot \frac{1 - \cos\left(\frac{2n\pi x}{L}\right)}{2} dx = \frac{1}{L} \int_0^L x \left(1 - \cos\left(\frac{2n\pi x}{L}\right)\right) dx$$
+
+**Step 4.** Distribute $x$ and split into two integrals:
+
+$$\langle x \rangle = \frac{1}{L} \left[\int_0^L x \, dx - \int_0^L x \cos\left(\frac{2n\pi x}{L}\right) dx\right]$$
+
+**Step 5.** The first integral is just $\int_0^L x \, dx = L^2 / 2$.
+
+**Step 6.** The second integral *looks* like it needs integration by parts, but there's a physics shortcut: it's the average of $x \cos(\ldots)$ over full wavelengths of cosine. By symmetry, this evaluates to zero.
+
+**Step 7.** Plug both back in:
+
+$$\langle x \rangle = \frac{1}{L} \left[\frac{L^2}{2} - 0\right] = \frac{L^2}{2L}$$
+
+<KeyResult>
+$$\langle x \rangle = \frac{L}{2}$$
+The average position is dead center. 💡🎯
+</KeyResult>
+
+The math actually proves what common sense suggests — and explains why we were using $L/2$ as $\Delta x$ when finding the uncertainty in momentum via the Heisenberg uncertainty principle.
+
+---
+
+## Where this leads
+
+Now that we know what $\psi$ is, why we square it, what makes a valid wave function, how to normalize it, and how to find expectation values — we have everything we need to study a real quantum system. Next: <WikiLink slug="exp-01" display="the 1D particle in a box" />, the simplest non-trivial bound state.

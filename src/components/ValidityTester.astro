@@ -1,0 +1,231 @@
+---
+// Click (a), (b), (c). See ψ(x) and dψ/dx with violations highlighted.
+---
+
+<div class="validity-tester" data-widget="validity-tester">
+  <div class="vt-buttons">
+    <button class="vt-btn" data-case="a">(a)</button>
+    <button class="vt-btn active" data-case="b">(b)</button>
+    <button class="vt-btn" data-case="c">(c)</button>
+  </div>
+
+  <div class="vt-plots">
+    <div>
+      <div class="vt-plot-caption">ψ(x)</div>
+      <svg class="vt-plot vt-psi-plot" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <div>
+      <div class="vt-plot-caption">dψ/dx</div>
+      <svg class="vt-plot vt-deriv-plot" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+  <div class="vt-verdict" data-display="verdict"></div>
+</div>
+
+<style>
+  .validity-tester { font-family: var(--serif); }
+
+  .vt-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .vt-btn {
+    font-family: var(--mono);
+    font-size: 1rem;
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+  }
+  .vt-btn:hover { background: #f0ead9; color: var(--ink); }
+  .vt-btn.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .vt-plots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 700px) {
+    .vt-plots { grid-template-columns: 1fr; }
+  }
+  .vt-plot-caption {
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.25rem;
+  }
+  .vt-plot {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #fcfaf4;
+    border: 1px solid var(--rule);
+  }
+
+  .vt-verdict {
+    margin-top: 1.25rem;
+    padding: 0.75rem 1rem;
+    border-radius: 3px;
+    font-size: 0.95rem;
+  }
+  .vt-verdict.pass {
+    background: #e8f5e8;
+    border-left: 3px solid #4a8a4a;
+    color: #2d5a2d;
+  }
+  .vt-verdict.fail {
+    background: #fae8e8;
+    border-left: 3px solid #a84a4a;
+    color: #6a2828;
+  }
+  .vt-verdict strong { font-weight: 700; }
+</style>
+
+<script>
+  function initValidityTester(root) {
+    const cases = {
+      a: {
+        // Step discontinuity at x=0
+        psi: (x) => x < 0 ? Math.exp(x) * 0.8 : -Math.exp(-x) * 0.8,
+        deriv: (x) => x < 0 ? Math.exp(x) * 0.8 : Math.exp(-x) * 0.8,
+        discontinuityX: 0,
+        derivDiscontinuityX: 0,
+        verdict: 'fail',
+        reason: '<strong>ψ(x) is not continuous at x = 0</strong> — it jumps from a positive value to a negative one. The derivative is also undefined at that jump. Fails Rules 1 and 2.'
+      },
+      b: {
+        // Smooth two-bump function: e.g. cos(2x) * exp(-x²/4)
+        psi: (x) => Math.cos(1.8 * x) * Math.exp(-x * x / 4),
+        deriv: (x) => -1.8 * Math.sin(1.8 * x) * Math.exp(-x * x / 4)
+                     + Math.cos(1.8 * x) * (-x / 2) * Math.exp(-x * x / 4),
+        verdict: 'pass',
+        reason: '<strong>ψ(x) and dψ/dx are both continuous everywhere.</strong> The wave function is well-defined at every point and its slope changes smoothly. Acceptable.'
+      },
+      c: {
+        // Kink at x=0: |sin(2x)| × exp(-x²/4)
+        psi: (x) => Math.abs(Math.sin(1.8 * x)) * Math.exp(-x * x / 4),
+        deriv: (x) => {
+          const inner = 1.8 * x;
+          const sign = Math.sin(inner) >= 0 ? 1 : -1;
+          return sign * 1.8 * Math.cos(inner) * Math.exp(-x * x / 4)
+                 + Math.abs(Math.sin(inner)) * (-x / 2) * Math.exp(-x * x / 4);
+        },
+        derivDiscontinuityX: 0,
+        verdict: 'fail',
+        reason: '<strong>ψ(x) is continuous but dψ/dx is not.</strong> Look at the kink at x = 0 — the slope jumps from positive to negative. Fails Rule 2: derivative must be continuous.'
+      }
+    };
+
+    const W = 400, H = 180;
+    const xMin = -3, xMax = 3;
+    const yMin = -1.2, yMax = 1.2;
+    const NS = 'http://www.w3.org/2000/svg';
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS(NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      return el;
+    }
+
+    function xToPx(x) { return ((x - xMin) / (xMax - xMin)) * W; }
+    function yToPx(y, yLo, yHi) { return H - ((y - yLo) / (yHi - yLo)) * H; }
+
+    function drawPlot(svg, fn, discontinuityX) {
+      svg.innerHTML = '';
+
+      // x-axis
+      svg.appendChild(svgEl('line', {
+        x1: 0, y1: H/2, x2: W, y2: H/2,
+        stroke: '#999', 'stroke-width': 0.75, 'stroke-dasharray': '2,3'
+      }));
+      // y-axis
+      svg.appendChild(svgEl('line', {
+        x1: xToPx(0), y1: 0, x2: xToPx(0), y2: H,
+        stroke: '#999', 'stroke-width': 0.75, 'stroke-dasharray': '2,3'
+      }));
+
+      // Determine y-range dynamically for this function
+      const samples = 400;
+      const ys = [];
+      for (let i = 0; i <= samples; i++) {
+        const x = xMin + (i / samples) * (xMax - xMin);
+        ys.push(fn(x));
+      }
+      const yLo = Math.min(...ys) * 1.15;
+      const yHi = Math.max(...ys) * 1.15;
+      const range = Math.max(Math.abs(yLo), Math.abs(yHi));
+      const yLoFinal = -range;
+      const yHiFinal = range;
+
+      // Plot, handling discontinuity by splitting the path
+      let path = '';
+      let started = false;
+      for (let i = 0; i <= samples; i++) {
+        const x = xMin + (i / samples) * (xMax - xMin);
+        const y = fn(x);
+        const px = xToPx(x);
+        const py = yToPx(y, yLoFinal, yHiFinal);
+
+        // Break the path at discontinuity
+        if (discontinuityX !== undefined &&
+            i > 0 &&
+            (xMin + ((i-1) / samples) * (xMax - xMin)) < discontinuityX &&
+            x >= discontinuityX) {
+          started = false;
+          // Mark the discontinuity with a red dashed vertical line
+          svg.appendChild(svgEl('line', {
+            x1: xToPx(discontinuityX), y1: 0,
+            x2: xToPx(discontinuityX), y2: H,
+            stroke: '#cc3333', 'stroke-width': 1.5, 'stroke-dasharray': '4,3'
+          }));
+        }
+
+        if (!started) {
+          path += `M ${px} ${py}`;
+          started = true;
+        } else {
+          path += ` L ${px} ${py}`;
+        }
+      }
+
+      svg.appendChild(svgEl('path', {
+        d: path, fill: 'none', stroke: '#2a4d8f', 'stroke-width': 1.5
+      }));
+    }
+
+    function update(caseKey) {
+      const c = cases[caseKey];
+      const psiSvg = root.querySelector('.vt-psi-plot');
+      const derivSvg = root.querySelector('.vt-deriv-plot');
+
+      drawPlot(psiSvg, c.psi, c.discontinuityX);
+      drawPlot(derivSvg, c.deriv, c.derivDiscontinuityX);
+
+      const verdict = root.querySelector('[data-display="verdict"]');
+      verdict.className = 'vt-verdict ' + c.verdict;
+      verdict.innerHTML = (c.verdict === 'pass' ? '✓ Acceptable. ' : '✗ Not acceptable. ') + c.reason;
+    }
+
+    root.querySelectorAll('.vt-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        root.querySelectorAll('.vt-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        update(btn.dataset.case);
+      });
+    });
+
+    update('b');  // start on the passing case
+  }
+
+  document.querySelectorAll('[data-widget="validity-tester"]').forEach(initValidityTester);
+</script>

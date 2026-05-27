@@ -1,0 +1,74 @@
+---
+import { getBacklinks } from '../content/backlinks.js';
+import { getEntry } from '../content/entries.js';
+
+const { slug } = Astro.props;
+const sources = getBacklinks(slug);
+
+const referencingEntries = sources
+  .map((s) => getEntry(s))
+  .filter(Boolean);
+---
+
+{referencingEntries.length > 0 && (
+  <section class="backlinks">
+    <h3 class="backlinks-title">Referenced by</h3>
+    <ul class="backlinks-list">
+      {referencingEntries.map((entry) => (
+        <li>
+          <a href={`/${entry.slug}`} class="backlink">
+            <span class="backlink-num">{entry.number}</span>
+            <span class="backlink-title">{entry.title}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .backlinks {
+    margin: 3rem 0 2rem;
+    padding: 1.25rem 1.5rem;
+    background: #f3eedf;
+    border-left: 3px solid var(--ink-faint);
+  }
+  .backlinks-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 0.75rem;
+  }
+  .backlinks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .backlink {
+    text-decoration: none;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .backlink:hover .backlink-title { color: var(--psi); }
+  .backlink-num {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    min-width: 5.5rem;
+  }
+  .backlink-title {
+    font-family: var(--serif);
+    font-size: 1rem;
+    transition: color 0.15s;
+  }
+</style>

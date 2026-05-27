@@ -1,0 +1,36 @@
+---
+const { title, meta } = Astro.props;
+---
+<div class="apparatus">
+  {(title || meta) && (
+    <div class="apparatus-meta">
+      {title && <span class="apparatus-title">{title}</span>}
+      {meta && <span class="apparatus-info">{meta}</span>}
+    </div>
+  )}
+  <div class="apparatus-body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .apparatus {
+    border: 1px solid var(--rule);
+    background: #fcfaf4;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .apparatus-meta {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .apparatus-title { color: var(--ink); font-weight: 500; }
+</style>

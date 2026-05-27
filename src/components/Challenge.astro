@@ -1,0 +1,27 @@
+---
+// A "Try it" challenge box.
+---
+<div class="challenge">
+  <slot />
+</div>
+
+<style>
+  .challenge {
+    background: var(--accent-faint);
+    border-left: 3px solid var(--ink);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+  }
+  .challenge::before {
+    content: "Try it ↓";
+    display: block;
+    font-family: var(--sans);
+    font-style: normal;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.5rem;
+  }
+</style>

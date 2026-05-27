@@ -1,0 +1,74 @@
+---
+const { n } = Astro.props;
+---
+<label for={`sn-toggle-${n}`} class="sidenote-toggle-label sidenote-ref">{n}</label>
+<input type="checkbox" id={`sn-toggle-${n}`} class="sidenote-toggle" />
+<span class="sidenote-content">
+  <span class="sidenote-num">{n}.</span>
+  <slot />
+</span>
+
+<style is:global>
+  /* Hidden checkbox — used only for mobile toggle */
+  .sidenote-toggle { display: none; }
+
+  .sidenote-ref {
+    font-family: var(--sans);
+    font-size: 0.7em;
+    font-weight: 600;
+    color: var(--psi);
+    cursor: pointer;
+    padding: 0 0.1em;
+    vertical-align: super;
+    line-height: 0;
+  }
+
+  @media (min-width: 1100px) {
+    /* Desktop: float into the right gutter. Floats stack naturally. */
+    .sidenote-content {
+      float: right;
+      clear: right;
+      margin-right: -340px;   /* push into the reserved 340px right padding */
+      margin-top: 0.3rem;
+      margin-bottom: 1rem;
+      margin-left: 1rem;
+      width: 280px;
+      font-family: var(--serif);
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--ink-soft);
+      padding-top: 0.4rem;
+      border-top: 1px solid var(--rule);
+      position: relative;
+    }
+    .sidenote-num {
+      font-family: var(--sans);
+      font-weight: 600;
+      color: var(--psi);
+      font-size: 0.75rem;
+      margin-right: 0.4em;
+    }
+  }
+
+  @media (max-width: 1099px) {
+    /* Mobile: hide by default, toggle on tap of the ref */
+    .sidenote-content {
+      display: none;
+      padding: 0.5rem 0 0.5rem 1rem;
+      margin: 0.5rem 0;
+      border-left: 2px solid var(--rule);
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+    }
+    .sidenote-toggle:checked + .sidenote-content {
+      display: block;
+    }
+    .sidenote-num {
+      font-family: var(--sans);
+      font-weight: 600;
+      color: var(--psi);
+      font-size: 0.8rem;
+      margin-right: 0.4em;
+    }
+  }
+</style>

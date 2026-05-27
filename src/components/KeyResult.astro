@@ -1,0 +1,19 @@
+---
+---
+<div class="key-result">
+  <slot />
+</div>
+
+<style>
+  .key-result {
+    margin: 2rem auto;
+    padding: 1.25rem 1.5rem;
+    max-width: 70%;
+    border: 1px solid var(--ink);
+    background: #fcfaf4;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+  .key-result :global(p) { margin: 0; }
+  .key-result :global(.katex-display) { margin: 0.5rem 0 !important; }
+</style>

@@ -1,0 +1,286 @@
+---
+// ParticleInBox: an interactive 1D particle-in-a-box apparatus.
+// Loads the wasm module compiled from src/physics/particle_box.cpp,
+// renders ψ(x) and |ψ(x)|² plots, and exposes sliders for n and L.
+---
+
+<div class="apparatus" data-apparatus="particle-box">
+  <div class="apparatus-meta">
+    <span>Hamiltonian: Ĥ = −½ ∂²/∂x²  (ℏ = m = 1)</span>
+    <span>Domain: x ∈ [0, L]</span>
+  </div>
+
+  <div class="plots">
+    <div>
+      <div class="plot-caption">ψ<sub>n</sub>(x) — amplitude</div>
+      <svg class="plot psi-plot" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <div>
+      <div class="plot-caption">|ψ<sub>n</sub>(x)|² — probability density</div>
+      <svg class="plot rho-plot" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label>n</label>
+    <input type="range" class="n-slider" min="1" max="6" step="1" value="1" />
+    <span class="value n-value">1</span>
+
+    <label>L</label>
+    <input type="range" class="L-slider" min="0.5" max="3.0" step="0.05" value="1.0" />
+    <span class="value L-value">1.00</span>
+  </div>
+
+  <div class="readout">
+    <span class="label-text">E<sub>n</sub> =</span> <span class="energy-val">…</span>
+    <span class="label-text" style="margin-left: 1.5rem;">E<sub>n</sub> / E<sub>1</sub> =</span> <span class="ratio-val">…</span>
+    <span class="label-text" style="margin-left: 1.5rem;">internal nodes:</span> <span class="nodes-val">…</span>
+  </div>
+</div>
+
+<style>
+  .apparatus {
+    border: 1px solid var(--rule);
+    background: #fcfaf4;
+    padding: 1.5rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .apparatus-meta {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .plots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  @media (max-width: 700px) {
+    .plots { grid-template-columns: 1fr; }
+  }
+  .plot-caption {
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin: 0.25rem 0 0.5rem;
+  }
+  svg.plot { width: 100%; height: auto; display: block; }
+
+  .controls {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--rule);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.6rem 1rem;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+  .controls label { color: var(--ink-soft); }
+  .controls .value { text-align: right; color: var(--ink); min-width: 4rem; }
+  .controls input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--ink-soft);
+    outline: none;
+  }
+  .controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+  }
+  .controls input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: none;
+    cursor: pointer;
+  }
+
+  .readout {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--rule);
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+  .readout .label-text { color: var(--ink-faint); }
+</style>
+
+<script>
+  // D3 imported from CDN. Astro will detect this and ship the script.
+  import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+
+  // The wasm loader (createParticleBoxModule) lives at /particle_box.js in public/
+  // We load it as a side-effect script tag.
+  function loadWasm() {
+    return new Promise((resolve, reject) => {
+      if (window.createParticleBoxModule) {
+        return resolve(window.createParticleBoxModule());
+      }
+      const script = document.createElement('script');
+      script.src = '/particle_box.js';
+      script.onload = () => resolve(window.createParticleBoxModule());
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  function vecToArray(vec) {
+    const arr = new Array(vec.size());
+    for (let i = 0; i < vec.size(); ++i) arr[i] = vec.get(i);
+    vec.delete();
+    return arr;
+  }
+
+  function countInternalNodes(arr) {
+    let count = 0;
+    let prev = arr[1];
+    for (let i = 2; i < arr.length - 1; ++i) {
+      if (Math.sign(arr[i]) !== Math.sign(prev) && arr[i] !== 0) count++;
+      if (arr[i] !== 0) prev = arr[i];
+    }
+    return count;
+  }
+
+  function initApparatus(root, Module) {
+    const N_POINTS = 300;
+    const W = 500, H = 320;
+    const margin = { top: 16, right: 16, bottom: 36, left: 44 };
+    const innerW = W - margin.left - margin.right;
+    const innerH = H - margin.top - margin.bottom;
+
+    function makePlot(svgEl, yLabel, lineClass, fillClass) {
+      const svg = d3.select(svgEl);
+      const g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const xScale = d3.scaleLinear().range([0, innerW]);
+      const yScale = d3.scaleLinear().range([innerH, 0]);
+
+      const xAxis = g.append('g').attr('class', 'axis')
+        .attr('transform', `translate(0,${innerH})`);
+      const yAxis = g.append('g').attr('class', 'axis');
+
+      g.append('text')
+        .attr('x', innerW / 2).attr('y', innerH + 30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'var(--ink-soft)')
+        .style('font-family', 'var(--mono)')
+        .style('font-size', '10px')
+        .text('x');
+
+      g.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -innerH / 2).attr('y', -30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'var(--ink-soft)')
+        .style('font-family', 'var(--mono)')
+        .style('font-size', '10px')
+        .text(yLabel);
+
+      const zeroLine = g.append('line').attr('class', 'zero-line')
+        .attr('x1', 0).attr('x2', innerW);
+
+      const leftWall = g.append('line').attr('class', 'box-wall')
+        .attr('y1', 0).attr('y2', innerH);
+      const rightWall = g.append('line').attr('class', 'box-wall')
+        .attr('y1', 0).attr('y2', innerH);
+
+      const fill = fillClass ? g.append('path').attr('class', fillClass) : null;
+      const path = g.append('path').attr('class', lineClass);
+
+      return { g, xScale, yScale, xAxis, yAxis, zeroLine, leftWall, rightWall, path, fill };
+    }
+
+    const psiPlot = makePlot(root.querySelector('.psi-plot'), 'ψₙ(x)', 'psi-line', null);
+    const rhoPlot = makePlot(root.querySelector('.rho-plot'), '|ψₙ(x)|²', 'rho-line', 'rho-fill');
+
+    const nSlider = root.querySelector('.n-slider');
+    const LSlider = root.querySelector('.L-slider');
+    const nValue = root.querySelector('.n-value');
+    const LValue = root.querySelector('.L-value');
+    const energyVal = root.querySelector('.energy-val');
+    const ratioVal = root.querySelector('.ratio-val');
+    const nodesVal = root.querySelector('.nodes-val');
+
+    function drawCurve(plot, xs, ys, L, symmetric) {
+      plot.xScale.domain([0, L]);
+      if (symmetric) {
+        const yMax = d3.max(ys.map(Math.abs));
+        plot.yScale.domain([-yMax * 1.15, yMax * 1.15]);
+      } else {
+        plot.yScale.domain([0, d3.max(ys) * 1.15]);
+      }
+      plot.xAxis.call(d3.axisBottom(plot.xScale).ticks(5).tickSizeOuter(0));
+      plot.yAxis.call(d3.axisLeft(plot.yScale).ticks(5).tickSizeOuter(0));
+      plot.zeroLine.attr('y1', plot.yScale(0)).attr('y2', plot.yScale(0));
+      plot.leftWall.attr('x1', plot.xScale(0)).attr('x2', plot.xScale(0));
+      plot.rightWall.attr('x1', plot.xScale(L)).attr('x2', plot.xScale(L));
+
+      const line = d3.line()
+        .x((_, i) => plot.xScale(xs[i]))
+        .y(d => plot.yScale(d));
+      plot.path.attr('d', line(ys));
+
+      if (plot.fill) {
+        const area = d3.area()
+          .x((_, i) => plot.xScale(xs[i]))
+          .y0(plot.yScale(0))
+          .y1(d => plot.yScale(d));
+        plot.fill.attr('d', area(ys));
+      }
+    }
+
+    function update() {
+      const n = +nSlider.value;
+      const L = +LSlider.value;
+      nValue.textContent = n;
+      LValue.textContent = L.toFixed(2);
+
+      const box = new Module.ParticleInBox(L, n);
+      const psi = vecToArray(box.wavefunction(N_POINTS));
+      const rho = vecToArray(box.probabilityDensity(N_POINTS));
+      const E = box.energy();
+      box.delete();
+
+      const ground = new Module.ParticleInBox(L, 1);
+      const E1 = ground.energy();
+      ground.delete();
+
+      energyVal.textContent = E.toFixed(4);
+      ratioVal.textContent = (E / E1).toFixed(2);
+      nodesVal.textContent = countInternalNodes(psi);
+
+      const xs = Array.from({length: N_POINTS}, (_, i) => i * L / (N_POINTS - 1));
+      drawCurve(psiPlot, xs, psi, L, true);
+      drawCurve(rhoPlot, xs, rho, L, false);
+    }
+
+    nSlider.addEventListener('input', update);
+    LSlider.addEventListener('input', update);
+    update();
+  }
+
+  // Initialize every .apparatus on the page
+  loadWasm().then((Module) => {
+    document.querySelectorAll('[data-apparatus="particle-box"]').forEach((root) => {
+      initApparatus(root, Module);
+    });
+  });
+</script>

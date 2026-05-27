@@ -1,0 +1,51 @@
+---
+import { getEntry } from '../content/entries.js';
+
+const { slug, display } = Astro.props;
+const entry = getEntry(slug);
+
+const isValid = !!entry;
+const text = display || (entry ? entry.title : slug);
+const href = `/${slug}`;
+const tooltip = entry
+  ? `${entry.number} — ${entry.description}`
+  : `Broken link: no entry with slug "${slug}"`;
+---
+
+{isValid ? (
+  <a class="wikilink" href={href} title={tooltip}>
+    {text}
+    <span class="wikilink-icon" aria-hidden="true">↗</span>
+  </a>
+) : (
+  <span class="wikilink wikilink-broken" title={tooltip}>
+    {text} (?)
+  </span>
+)}
+
+<style>
+  .wikilink {
+    color: var(--psi);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--psi);
+    padding-bottom: 1px;
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+  .wikilink:hover {
+    background: rgba(42, 77, 143, 0.08);
+    border-bottom-style: solid;
+  }
+  .wikilink-icon {
+    display: inline-block;
+    font-size: 0.7em;
+    margin-left: 0.15em;
+    color: var(--ink-faint);
+    vertical-align: super;
+    line-height: 0;
+  }
+  .wikilink-broken {
+    color: #a84a4a;
+    border-bottom: 1px dashed #a84a4a;
+    cursor: help;
+  }
+</style>

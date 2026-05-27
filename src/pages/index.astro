@@ -1,0 +1,112 @@
+---
+import SiteFooter from '../components/SiteFooter.astro';
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QM Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <main transition:name="page-content" transition:animate="page-turn">
+    <h1>QM Journal</h1>
+    <p class="tagline">A working notebook for learning quantum mechanics by building it.</p>
+
+    <ol class="entries">
+      <li>
+        <a href="/lecture-00">
+          <span class="entry-num">Lecture 00</span>
+          <span class="entry-title">Wave functions, Normalization, Expected values</span>
+        </a>
+        <p class="entry-sub">What ψ is, why we square it, and how to get real numbers out of complex math.</p>
+      </li>
+      <li>
+        <a href="/exp-01">
+          <span class="entry-num">Exp. 01</span>
+          <span class="entry-title">The particle in a box</span>
+        </a>
+        <p class="entry-sub">The simplest bound state: a particle confined to an infinite square well.</p>
+      </li>
+    </ol>
+  </main>
+
+  <div class="footer-wrapper">
+    <SiteFooter />
+  </div>
+
+<style>
+  :root {
+    --paper: #faf6ee;
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-faint: #8a8a8a;
+    --rule: #d8d1c2;
+    --psi: #2a4d8f;
+    --serif: 'EB Garamond', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 19px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  main { max-width: 680px; margin: 4rem auto 0; padding: 0 2rem; }
+  h1 {
+    font-weight: 500;
+    font-size: 2.2rem;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .tagline {
+    font-style: italic;
+    color: var(--ink-soft);
+    margin: 0 0 3rem;
+  }
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .entries li {
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--rule);
+  }
+  .entries li:last-child { border-bottom: 1px solid var(--rule); }
+  .entries a {
+    text-decoration: none;
+    color: var(--ink);
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+  }
+  .entries a:hover .entry-title { color: var(--psi); }
+  .entry-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    min-width: 6rem;
+  }
+  .entry-title { font-size: 1.1rem; }
+  .entry-sub {
+    margin: 0.25rem 0 0 7rem;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    font-style: italic;
+  }
+  .footer-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+</style>
+</body>
+</html>
