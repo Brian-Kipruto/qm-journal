@@ -4,7 +4,7 @@ A working notebook for learning quantum mechanics by building it. Each entry pai
 
 ## Live site
 
-[link to your deployment, once you deploy]
+[Deployment link will come here]
 
 ## Stack
 
