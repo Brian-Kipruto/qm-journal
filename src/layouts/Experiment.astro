@@ -3,7 +3,9 @@
 // MDX passes frontmatter through Astro.props.frontmatter
 const { frontmatter } = Astro.props;
 import SiteFooter from '../components/SiteFooter.astro';
+import Backlinks from '../components/Backlinks.astro';
 import { ClientRouter } from 'astro:transitions';
+import EntryNavigation from '../components/EntryNavigation.astro';
 const { title, subtitle, expNumber, date, tags } = frontmatter;
 
 const formattedDate = new Date(date).toLocaleDateString('en-US', {
@@ -39,6 +41,16 @@ const formattedDate = new Date(date).toLocaleDateString('en-US', {
     {subtitle && <p class="subtitle">{subtitle}</p>}
 
     <slot />
+
+    {(() => {
+      const slug = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
+      return <Backlinks slug={slug} />;
+    })()}
+
+    {(() => {
+      const slug = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
+      return <EntryNavigation slug={slug} />;
+    })()}
 
     <div transition:persist="site-footer">
   <SiteFooter lastUpdated={date} />

@@ -3,6 +3,7 @@ const { frontmatter } = Astro.props;
 import SiteFooter from '../components/SiteFooter.astro';
 import Backlinks from '../components/Backlinks.astro';
 import { ClientRouter } from 'astro:transitions';
+import EntryNavigation from '../components/EntryNavigation.astro';
 const { title, subtitle, lectureNumber, date, tags, source } = frontmatter;
 
 const formattedDate = new Date(date).toLocaleDateString('en-US', {
@@ -45,7 +46,12 @@ const formattedDate = new Date(date).toLocaleDateString('en-US', {
 {(() => {
       const slug = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
       return <Backlinks slug={slug} />;
-    })()}    
+    })()} 
+
+    {(() => {
+      const slug = Astro.url.pathname.replace(/^\//, '').replace(/\/$/, '');
+      return <EntryNavigation slug={slug} />;
+    })()}   
     
     <div transition:persist="site-footer">
   <SiteFooter lastUpdated={date} />
