@@ -19,6 +19,14 @@ export const entries = [
     date: '2026-05-23',
     tags: ['Bound state', '1D', 'Time-independent'],
   },
+  {
+    slug: 'lecture-01',
+    number: 'Lecture 01',
+    title: 'The "Hello World" of QM',
+    description: "Entry point of all QM learning. An explanation of the concept of the particle in a box.",
+    date: '2026-05-23',
+    tags: ['Foundations', 'Wave function', 'Probability'],
+  },
 ];
 
 // Helper: look up an entry by slug. Returns undefined if not found.

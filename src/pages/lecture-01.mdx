@@ -1,0 +1,104 @@
+---
+layout: ../layouts/Lecture.astro
+title: The "Hello World" of Quantum Mechanics
+subtitle: What ψ is, why we square it, and how to get real numbers out of complex math.
+lectureNumber: "00"
+date: 2026-05-23
+tags: [Foundations, Wave function, Probability]
+source: Mr Mangala's Lecture 11
+---
+
+import Section from '../components/Section.astro';
+import Example from '../components/Example.astro';
+import Aside from '../components/Aside.astro';
+import KeyResult from '../components/KeyResult.astro';
+import Apparatus from '../components/Apparatus.astro';
+import Figure from '../components/Figure.astro';
+import WikiLink from '../components/WikiLink.astro';
+import ComplexExplorer from '../components/ComplexExplorer.astro';
+import ValidityTester from '../components/ValidityTester.astro';
+import probDensity from '../assets/lecture-00/probability-density.png';
+import quantumDot from '../assets/exp-01/quantum_dot.png';
+import ballBounce from '../assets/exp-01/ballBounce.png';
+
+## Lets Begin!
+So so far I have seen Quantum uncertainties, Normalization and expectation values, the wave function and how it relates 
+to probability amplitude and probability density.
+
+In this lecture, we now take the "particle in a box" example that i used to understand normalization and expectation values, and it explains the physics of why the wave behaves that way.
+
+First of all it is important to note that this concept is **HIGHLY IDEALIZED !!!** . It is essentially the "Hello World" of Quantum mechanics. It feels like a math trick because its so "Fake". In this idealized "box" math we ignore other particles or outside forces, we simply define the space outside as "forbidden". It all seems "fake" and highly idealized from what i have learnt below and it got me wondering what the importance of studying it is  but apparently its importance lies in the 2 massive concepts it proves that classical mechanics cannot explain:
+
+1. **Quantization (The "Digital" Nature of energy**) - In our everyday world, if you throw a ball, it can have any speed you want, IKph, 2 etc, but in this box, the math proves that the particle cannot have just any energy. Because the wave function must be zero at the walls and beyond, only specific vibrations can fit inside. 
+   
+- The lesson here is that it explains why electrons in atoms have specific "shells" or levels, rather than just floating anywhere within the atom. Its the reason for the "Quantum" in Quantum mechanics
+
+2. **The Death of "Rest**" (Zero point energy) - idk why i love this concept, I just do😂, but inside the box if the particle just sat perfectly still, it would violate **Heisenbergs Uncertainty Principle**
+
+- The lesson here is that the box proves that even at absolute zero temperatures, matter still has to jitter. Nothing in the universe is ever truly still.
+
+but even though this box is a "perfected" version, the same math is used to design actual tech:
+- **Quantum Dots:** These are tiny "boxes" (nanocrystals) where we trap electrons. By changing the **size of the box (\(L\))**, we change the energy levels, which changes the color of light the dot emits. This is how high-end QLED TVs create such specific colors.
+- **Conductive Polymers:** We treat the backbone of long molecules like a "box" for electrons to move through, helping us understand how electricity flows through plastic or organic solar cells.
+- **Color in Molecules:** The reason some dyes (like those in carrots or leaves) are specific colors is that their electrons are trapped in "boxes" created by their chemical bonds.
+
+So even though its highly idealistic, im thinking of it like flying a plane simulator  with no wind or gravity and once you master the idealized verrsion, I add just a little leakage (tunneling) or "bumps" (potential) to understand how real world atoms actually work. So, Lets Get to it.
+
+<Section letter="A" title="The setup - The infinite potential well" />
+This "box" we are actually talking about is a simplified 1D model of a particle
+completely trapped in a tiny space, like an electron in a quantum dot. 
+
+<Aside title="quantum dot">
+simply put, a **quantum dot** is a tiny speck of semi-conductor material, a nano crystal, so small
+about 2-10 nm in diameter. They exhibit unique optical and electrical properties due to the
+concept of **quantum confinement**. 
+
+They are often 0ften called 'artificial atoms" because they hold electrons in discrete energy levels and are manufactured in labs.
+They are made from semi-conductor materials such as silicon, cadmium selenide, cadmium sulfide or Indium arsenide.
+This particles emit specific bright colors of light with smaller dots emitting
+blue and larger dots emiting red.
+<Figure
+  src={quantumDot}
+  alt="Wave function ψ and probability density |ψ|² side by side, with an interference pattern strip showing real-world bright and dark bands."
+  caption="The wave function ψ, its squared probability density |ψ|², and the resulting interference pattern."
+  source="Mr Mangala's lecture slide"
+  width="wide"
+/>
+Read more on quantum dots from this medium article https://medium.com/iete-sf-mec/quantum-dots-2cddb4f96e8c
+
+</Aside>
+
+ok so back to particle in a box, inside the box (from 0-L), the particle moves freely, 
+meaning its potential energy is zero (U=0). Outside the box, the potential energy
+shoots up to infinity ($U=\infty$). Because the particle would need infinite energy to exist out there, the wave function outside the box is exactly zero ($\psi = 0$)
+
+It is important to note that in this "particular box" model, the "box" is not made of wood
+or metal but is defined by **impenetrable barriers**. 
+
+<Figure
+  src={ballBounce}
+  alt="#"
+  width="wide"
+/>
+
+A good analogy to better understand this woulld be imagining a ball bouncing between
+2 walls. If the walls are infinite, it means no matter how hard the bll hits on both walls, they
+willnever move or break or allow the ball to pass. 
+
+In physics terms, it would take **infinite work(energy)** to displace the boundary
+or push the ball into the wall. By setting (U=$\infty$) outside,we  are essentially
+"locking" the ball inside the barrier. It is a way of saying ***it is impossible for the ball to be anywhere else.***
+
+I was not understanding why the wave function outside the box was zero, but i came up with the following explanation:
+
+Well in the previous <WikiLink slug="lecture-00" display="lecture" />, I understood that a wave function $\psi(x)$ is
+**a complex valued mathematical description of a quantum particle that represents
+the probability amplitude of finding the said particle at a specific location**. Thuus at the walls and 
+beyond, the wave function must be zero.
+
+1. **Conservation of Energy** - In order for the particle to exist in a region where U=$/infty$, It would need an infinite amount 
+of energy. Since our particle has got a finite fixed energy (Zero point energy),it simply cannot exist there.
+
+2. **The Probability rule** - If the probabiloity of finding the particle outside is zero, the math has to reflect that. Since the 
+actual probability of finding the particle is calculated by the probability density $|\psi|^2$, if the probability is zero, then $\psi$ 
+itself must be zero.
