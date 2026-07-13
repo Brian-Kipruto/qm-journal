@@ -20,6 +20,13 @@ import ValidityTester from '../components/ValidityTester.astro';
 import probDensity from '../assets/lecture-00/probability-density.png';
 import quantumDot from '../assets/exp-01/quantum_dot.png';
 import ballBounce from '../assets/exp-01/ballBounce.png';
+import boundaryCondition1 from '../assets/exp-01/boundaryCondition1.png';
+import boundaryCondition2 from '../assets/exp-01/boundaryCondition2.png';
+import BoundaryExplorer from '../components/BoundaryExplorer.astro';
+
+
+
+
 
 ## Lets Begin!
 So so far I have seen Quantum uncertainties, Normalization and expectation values, the wave function and how it relates 
@@ -60,8 +67,8 @@ blue and larger dots emiting red.
 <Figure
   src={quantumDot}
   alt="Wave function ψ and probability density |ψ|² side by side, with an interference pattern strip showing real-world bright and dark bands."
-  caption="The wave function ψ, its squared probability density |ψ|², and the resulting interference pattern."
-  source="Mr Mangala's lecture slide"
+  caption="Image illustration of a quantum dot."
+  source="Aravind B S medium article👇🏾"
   width="medium"
 />
 Read more on quantum dots from this medium article https://medium.com/iete-sf-mec/quantum-dots-2cddb4f96e8c
@@ -78,7 +85,7 @@ or metal but is defined by **impenetrable barriers**.
 <Figure
   src={ballBounce}
   alt="#"
-  width="wide"
+  width="narrow"
 />
 
 A good analogy to better understand this woulld be imagining a ball bouncing between
@@ -102,3 +109,91 @@ of energy. Since our particle has got a finite fixed energy (Zero point energy),
 2. **The Probability rule** - If the probabiloity of finding the particle outside is zero, the math has to reflect that. Since the 
 actual probability of finding the particle is calculated by the probability density $|\psi|^2$, if the probability is zero, then $\psi$ 
 itself must be zero.
+
+Then again I found myself needing an explanation of what this potential energy U is.
+
+<Aside title = "An explanation of this potential energy">
+Initially my thought process was that the potential energy inside the "box" was zero becauseof the **zero point energy**. Yk, I was linking
+the fact that the particle is "active" (Kinetic energy) with the idea that it isn't stored(potential energy).
+
+However, I have learnt that in physics, it is a bit of a more formal setup. like the "particle in a box" above,
+we manually set the potential energy (U) to zero inside the box as the baseline. It is like saying the flooe of the box is perfectly flat, there are
+no hills or valleys (forces) pushing the particle around when inside. The key distinction for my logic iis as follows:
+
+1. **potential Energy (U=0)** $\rightarrow$ This is the environment. It gets confusing because i tend to go back to my basic understanding of potential and kinetic energies but i have
+learnt that physicists tend to use $U=0$ to simply say "nothing is happening here", yk ignore friction, ignore magnetism, ignore air resistance....sort of like "**Quantum Kinematics**".
+Here, it means that the particle is "free" to move without any outside force acting on it while it is between 0 and L.
+
+2. **Zero-Point energy($E>0$)** $\rightarrow$ This is the particles state. Because the particle is trapped in a tiny state, Heisenbergs uncertainty principle says that we cannot know its 
+position and momentum perfectly. If it stopped moving i.e. KE=0, we would know both so it has to keep moving. 
+
+Now why does $U=\infty$ matter for the wave function?  Think of the infinite potential outside as an infinite "cost" to leave. Because the particle ony has a finite amount of energy, it cannot
+pay the bill to enter the region where $U=\infty$
+
+Mathematically, the Schrodinger equation shows that if the potential energy is much higher than the particles energy, the wave function must decay to zero. Since the potential here is infinitely high,
+that decay happens instantly at the walls. The wave function hits the the wall and drops to nothing because there is a 0% chance the particle can exist in a place it does not have the enrgy to reach.
+
+Well, at least this is how i understood this concept😂
+</Aside>
+
+<Section letter="B" title="Boundary Conditions (Where ths sine wave comes from)" />
+
+So one of the rules of QM states that a wave function must be continuous, finite and single valued. you can revisit the 3 rules of a valid wave function <WikiLink slug="lecture-00#section-a-rules-of-a-valid-wave-function" display="here." />
+
+If the wavr is exactly zero outside the box, it must perfectly taper offto exactly zero right at the walls. ($x=0 \text{ and } x=L$).
+
+<Figure
+  src={boundaryCondition1}
+  alt="Wave function ψ and probability density |ψ|² side by side, with an interference pattern strip showing real-world bright and dark bands."
+  caption="#"
+  source="Mr Mangala's lecture notes"
+  width="medium"
+/>
+
+<Figure
+  src={boundaryCondition2}
+  alt="Wave function ψ and probability density |ψ|² side by side, with an interference pattern strip showing real-world bright and dark bands."
+  caption="#"
+  source="Mr Mangala's lecture notes"
+  width="medium"
+/>
+
+I love analogies so i got to thinking of this "anchoring" like a guitar string of length L. Because both ends are bolted down, you can only create vibrations
+that have "nodes" (points of zero movement) at those exact spots. The waves that fit in the box must have an integral number of whole or half-wavelengths giving us this core rule
+
+$$\lambda = \frac{2L}{n}$$
+
+where;
+L = width of the box
+$\lambda$ = the wavelength (distance for one full up & down cycle)
+n = the mode index (or quantum number). It represents which level the particle is in.
+
+Breaking down the levels in the above image:
+
+| n | Whats happening    | λ    | Why it fits                                             |
+| :-: |:-------------------|:----:|:--------------------------------------------------------|
+| n=1 | one big "hump"     | 2L   | Half of a full wave. Starts at 0 and ends at 0.         |
+| n=2 | one full "s" shape | L    | One full wave sits perfectly between both walls.        |
+| n=3 | one and a half humps | 2L/3 | Three half waves — again starts and ends at zero.     |
+| n=4 | 2 full "s" shapes  | L/2  | Two full waves, fits perfectly.                         |
+
+<Apparatus title="Try to fit a wave into the box" meta="Drag λ; watch what happens at the right wall.">
+  <BoundaryExplorer />
+</Apparatus>
+
+A very important phenomenon of QM actually comes out of this **Quantization** of Energy.
+
+Since the particle is acting like a wave, its momentum is linked to its wavlength ($\lambda$)
+
+- Small $\lambda$ (more humps) = High Momentum = **High energy**
+- Large $\lambda$ (fewerr humps) = Low momentum =**Low energy**
+
+Because the walls "force" the wave to have specific wavelengths, like (L) 0r (2L/3), the particle is
+forced to also have specific energy levels. It literally cannot vibrate at a wavelength like (1.15L)
+because it would not hit zero ath the right hand wall, it would "crash" into  the infinite potential.
+
+***The "zero point" connection***
+
+Notice that there is no (n=0). if n=0, the wavelenth would be infinite (a flat line), which would mean that the particle
+has got zero energy and zero motion. But a flat line at zero also means that the **particle does not exist!** This proves why the 
+particle ought to have at least n=1 (a "jiggle") in order for it to stay inside the box. 

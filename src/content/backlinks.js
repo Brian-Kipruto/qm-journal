@@ -22,7 +22,7 @@ const backlinkMap = (() => {
     let match;
     WIKILINK_RE.lastIndex = 0;
     while ((match = WIKILINK_RE.exec(content)) !== null) {
-      const targetSlug = match[1];
+      const targetSlug = match[1].split('#')[0];  // strip anchor for backlink target
       if (targetSlug === sourceSlug) continue;
       if (!result[targetSlug]) result[targetSlug] = new Set();
       result[targetSlug].add(sourceSlug);

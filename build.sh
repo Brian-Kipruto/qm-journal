@@ -19,4 +19,10 @@ emcc src/physics/complex_number.cpp \
     -s ENVIRONMENT=web \
     -O2
 
+emcc src/physics/standing_wave.cpp \
+    -o public/standing_wave.js \
+    -lembind -s MODULARIZE=1 \
+    -s EXPORT_NAME="createStandingWaveModule" \
+    -s ENVIRONMENT=web -O2
+
 echo "✓ Build complete: particle_box.{js,wasm} + complex_number.{js,wasm}"

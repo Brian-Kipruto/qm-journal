@@ -2,14 +2,17 @@
 import { getEntry } from '../content/entries.js';
 
 const { slug, display } = Astro.props;
-const entry = getEntry(slug);
+
+// Slug may contain an anchor: "lecture-00#section-b-normalisation-conditions"
+const [baseSlug, anchor] = slug.split('#');
+const entry = getEntry(baseSlug);
 
 const isValid = !!entry;
 const text = display || (entry ? entry.title : slug);
-const href = `/${slug}`;
+const href = anchor ? `/${baseSlug}#${anchor}` : `/${baseSlug}`;
 const tooltip = entry
-  ? `${entry.number} — ${entry.description}`
-  : `Broken link: no entry with slug "${slug}"`;
+  ? `${entry.number} — ${entry.description}${anchor ? ` (§ ${anchor})` : ''}`
+  : `Broken link: no entry with slug "${baseSlug}"`;
 ---
 
 {isValid ? (

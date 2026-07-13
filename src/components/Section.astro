@@ -1,13 +1,24 @@
 ---
 const { letter, title } = Astro.props;
+
+// Generate a URL-safe slug from the title.
+// "Rules of a valid wave function" → "rules-of-a-valid-wave-function"
+const anchorId = title
+  ? `section-${letter?.toLowerCase() || ''}-${title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')}`
+  : null;
 ---
-<div class="section-heading">
+
+<div class="section-heading" id={anchorId}>
   <span class="section-highlight">{letter}. {title}</span>
 </div>
 
 <style>
   .section-heading {
     margin: 3rem 0 1rem;
+    scroll-margin-top: 2rem;
   }
   .section-highlight {
     font-family: var(--sans);
@@ -16,6 +27,5 @@ const { letter, title } = Astro.props;
     color: var(--highlight-section-dark);
     background: linear-gradient(transparent 55%, var(--highlight-section) 55%);
     padding: 0 0.3em;
-    /* the gradient trick fakes a highlighter pen drawing over the bottom half */
   }
 </style>

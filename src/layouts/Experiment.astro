@@ -214,6 +214,74 @@ const formattedDate = new Date(date).toLocaleDateString('en-US', {
   ::view-transition-new(page-content) {
     animation: page-turn-in 320ms cubic-bezier(0.2, 0.0, 0.2, 1) 80ms both;
   }
+  /* Anchor links appended to markdown headings */
+  .main h2, .main h3 {
+    scroll-margin-top: 2rem;
+  }
+  .heading-anchor {
+    margin-left: 0.5em;
+    color: var(--ink-faint);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .main h2:hover .heading-anchor,
+  .main h3:hover .heading-anchor {
+    opacity: 1;
+  }
+  .heading-anchor:hover {
+    color: var(--psi);
+  }
+
+  /* ===== Tables ===== */
+  .main table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-family: var(--serif);
+    font-size: 0.95rem;
+  }
+
+  .main thead th {
+    text-align: left;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    border-bottom: 1.5px solid var(--ink);
+    vertical-align: bottom;
+  }
+
+  .main tbody td {
+    padding: 0.6rem 0.75rem 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.45;
+  }
+
+  .main tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Numbers and short symbols read better in monospace */
+  .main tbody td:first-child {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+    white-space: nowrap;
+    padding-right: 1.5rem;
+  }
+
+  /* Hover row for scanability */
+  .main tbody tr {
+    transition: background-color 0.1s;
+  }
+  .main tbody tr:hover {
+    background: var(--accent-faint);
+  }
 </style>
 
 </body>

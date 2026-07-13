@@ -1,0 +1,353 @@
+---
+// Interactive standing-wave: drag wavelength, see whether it fits the box.
+---
+
+<div class="boundary-explorer" data-widget="boundary-explorer">
+  <div class="be-plot-wrapper">
+    <svg class="be-plot" viewBox="0 0 600 280" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="be-status" data-display="status">
+    <span class="be-status-icon" data-display="status-icon">?</span>
+    <span class="be-status-text" data-display="status-text">…</span>
+  </div>
+
+  <div class="be-controls">
+    <label>λ / L</label>
+    <input type="range" class="lambda-slider" min="0.3" max="2.5" step="0.001" value="2.0" />
+    <span class="value" data-display="lambda-value">2.00</span>
+  </div>
+
+  <div class="be-readout">
+    <div class="be-readout-row">
+      <span class="label-text">ψ(L) =</span>
+      <span class="readout-val" data-display="endpoint">…</span>
+    </div>
+    <div class="be-readout-row">
+      <span class="label-text">nearest mode:</span>
+      <span class="readout-val" data-display="mode">…</span>
+    </div>
+  </div>
+
+  <div class="be-preset-buttons">
+    <button class="preset-btn" data-n="1">n=1 (λ=2L)</button>
+    <button class="preset-btn" data-n="2">n=2 (λ=L)</button>
+    <button class="preset-btn" data-n="3">n=3 (λ=2L/3)</button>
+    <button class="preset-btn" data-n="4">n=4 (λ=L/2)</button>
+  </div>
+</div>
+
+<style>
+  .boundary-explorer { font-family: var(--serif); }
+
+  .be-plot-wrapper {
+    background: #fcfaf4;
+    border: 1px solid var(--rule);
+    padding: 0.5rem;
+  }
+  .be-plot {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .be-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    border-radius: 3px;
+    font-size: 0.95rem;
+    transition: background 0.2s, color 0.2s;
+  }
+  .be-status.allowed {
+    background: #e8f5e8;
+    border-left: 3px solid #4a8a4a;
+    color: #2d5a2d;
+  }
+  .be-status.forbidden {
+    background: #fae8e8;
+    border-left: 3px solid #a84a4a;
+    color: #6a2828;
+  }
+  .be-status-icon {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.1rem;
+    width: 1.5rem;
+    text-align: center;
+  }
+
+  .be-controls {
+    padding: 1rem 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem 1rem;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+  }
+  .be-controls label { color: var(--ink-soft); }
+  .be-controls .value {
+    text-align: right;
+    color: var(--ink);
+    min-width: 3.5rem;
+  }
+  .be-controls input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--ink-soft);
+    outline: none;
+  }
+  .be-controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+  }
+  .be-controls input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: none;
+    cursor: pointer;
+  }
+
+  .be-readout {
+    padding: 0.75rem 0;
+    border-top: 1px dashed var(--rule);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .be-readout-row { display: flex; gap: 0.5rem; align-items: baseline; }
+  .label-text { color: var(--ink-faint); }
+  .readout-val { color: var(--ink); font-weight: 500; }
+
+  .be-preset-buttons {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--rule);
+  }
+  .preset-btn {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover {
+    background: var(--accent-faint);
+    color: var(--ink);
+    border-color: var(--ink-soft);
+  }
+</style>
+
+<script>
+  function loadStandingWave() {
+    return new Promise((resolve, reject) => {
+      if (window.createStandingWaveModule) {
+        return resolve(window.createStandingWaveModule());
+      }
+      const s = document.createElement('script');
+      s.src = '/standing_wave.js';
+      s.onload = () => resolve(window.createStandingWaveModule());
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  function vecToArray(vec) {
+    const arr = new Array(vec.size());
+    for (let i = 0; i < vec.size(); ++i) arr[i] = vec.get(i);
+    vec.delete();
+    return arr;
+  }
+
+  function initWidget(root, Module) {
+    const svg = root.querySelector('.be-plot');
+    const W = 600, H = 280;
+    const margin = { top: 30, right: 40, bottom: 40, left: 40 };
+    const innerW = W - margin.left - margin.right;
+    const innerH = H - margin.top - margin.bottom;
+    const centerY = margin.top + innerH / 2;
+    const L = 1.0;   // box length in natural units
+    const TOLERANCE = 0.02;
+    const N_POINTS = 400;
+    const NS = 'http://www.w3.org/2000/svg';
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS(NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      return el;
+    }
+
+    // Static elements: walls, x-axis, zero line
+    // Left wall
+    svg.appendChild(svgEl('line', {
+      x1: margin.left, y1: margin.top,
+      x2: margin.left, y2: margin.top + innerH,
+      stroke: '#1a1a1a', 'stroke-width': 2.5
+    }));
+    // Right wall
+    svg.appendChild(svgEl('line', {
+      x1: margin.left + innerW, y1: margin.top,
+      x2: margin.left + innerW, y2: margin.top + innerH,
+      stroke: '#1a1a1a', 'stroke-width': 2.5
+    }));
+    // Zero line (dashed)
+    svg.appendChild(svgEl('line', {
+      x1: margin.left, y1: centerY,
+      x2: margin.left + innerW, y2: centerY,
+      stroke: '#999', 'stroke-width': 0.75, 'stroke-dasharray': '3,3'
+    }));
+
+    // Wall labels
+    const label0 = svgEl('text', {
+      x: margin.left, y: margin.top + innerH + 20,
+      'text-anchor': 'middle',
+      'font-family': 'JetBrains Mono, monospace', 'font-size': '11', fill: '#4a4a4a'
+    });
+    label0.textContent = 'x = 0';
+    svg.appendChild(label0);
+    const labelL = svgEl('text', {
+      x: margin.left + innerW, y: margin.top + innerH + 20,
+      'text-anchor': 'middle',
+      'font-family': 'JetBrains Mono, monospace', 'font-size': '11', fill: '#4a4a4a'
+    });
+    labelL.textContent = 'x = L';
+    svg.appendChild(labelL);
+
+    // The wave curve
+    const wavePath = svgEl('path', {
+      fill: 'none',
+      stroke: '#2a4d8f',
+      'stroke-width': 2
+    });
+    svg.appendChild(wavePath);
+
+    // Endpoint indicator (a filled circle at ψ(L))
+    const endpointDot = svgEl('circle', {
+      r: 6,
+      stroke: 'none'
+    });
+    svg.appendChild(endpointDot);
+
+    // Vertical dashed line from endpoint down to zero (only visible when failing)
+    const endpointFailLine = svgEl('line', {
+      stroke: '#cc3333',
+      'stroke-width': 1.5,
+      'stroke-dasharray': '3,3'
+    });
+    svg.appendChild(endpointFailLine);
+
+    // "Boundary mismatch" text next to failed endpoint
+    const mismatchLabel = svgEl('text', {
+      'font-family': 'JetBrains Mono, monospace', 'font-size': '11', fill: '#cc3333',
+      'text-anchor': 'start'
+    });
+    svg.appendChild(mismatchLabel);
+
+    const slider = root.querySelector('.lambda-slider');
+    const lambdaValue = root.querySelector('[data-display="lambda-value"]');
+    const endpointDisplay = root.querySelector('[data-display="endpoint"]');
+    const modeDisplay = root.querySelector('[data-display="mode"]');
+    const status = root.querySelector('[data-display="status"]');
+    const statusIcon = root.querySelector('[data-display="status-icon"]');
+    const statusText = root.querySelector('[data-display="status-text"]');
+
+    function update() {
+      const lambda = +slider.value;
+      lambdaValue.textContent = lambda.toFixed(3);
+
+      const wave = new Module.StandingWave(L, lambda);
+      const psi = vecToArray(wave.sample(N_POINTS));
+      const endpoint = wave.endpointValue();
+      const nearestMode = wave.nearestMode();
+      const allowed = wave.isAllowedMode(TOLERANCE);
+      wave.delete();
+
+      // Draw wave path
+      const scaleX = innerW / L;
+      const scaleY = innerH / 2 * 0.9;   // 90% of half-height to leave breathing room
+      let d = '';
+      for (let i = 0; i < N_POINTS; ++i) {
+        const x = margin.left + (i * L / (N_POINTS - 1)) * scaleX;
+        const y = centerY - psi[i] * scaleY;
+        d += (i === 0 ? 'M' : ' L') + ` ${x} ${y}`;
+      }
+      wavePath.setAttribute('d', d);
+
+      // Endpoint dot position
+      const endpointX = margin.left + innerW;
+      const endpointY = centerY - endpoint * scaleY;
+      endpointDot.setAttribute('cx', endpointX);
+      endpointDot.setAttribute('cy', endpointY);
+      endpointDot.setAttribute('fill', allowed ? '#4a8a4a' : '#cc3333');
+
+      // Fail line: dashed vertical from endpoint down to zero
+      if (allowed) {
+        endpointFailLine.setAttribute('opacity', 0);
+        mismatchLabel.setAttribute('opacity', 0);
+      } else {
+        endpointFailLine.setAttribute('opacity', 1);
+        endpointFailLine.setAttribute('x1', endpointX);
+        endpointFailLine.setAttribute('y1', endpointY);
+        endpointFailLine.setAttribute('x2', endpointX);
+        endpointFailLine.setAttribute('y2', centerY);
+        mismatchLabel.setAttribute('opacity', 1);
+        mismatchLabel.setAttribute('x', endpointX - 90);
+        mismatchLabel.setAttribute('y', endpointY < centerY ? endpointY - 8 : endpointY + 16);
+        mismatchLabel.textContent = `ψ(L) ≠ 0`;
+      }
+
+      // Readouts
+      endpointDisplay.textContent = endpoint.toFixed(4);
+      modeDisplay.textContent = allowed ? `n = ${nearestMode}` : `≈ ${nearestMode} (off)`;
+
+      // Status banner
+      if (allowed) {
+        status.className = 'be-status allowed';
+        statusIcon.textContent = '✓';
+        statusText.innerHTML = `<strong>Allowed.</strong> This wavelength fits — λ = 2L/${nearestMode}, corresponding to the n = ${nearestMode} mode.`;
+      } else {
+        status.className = 'be-status forbidden';
+        statusIcon.textContent = '✗';
+        statusText.innerHTML = `<strong>Forbidden.</strong> The wave doesn't hit zero at the right wall. Nearest allowed mode: n = ${nearestMode}.`;
+      }
+    }
+
+    slider.addEventListener('input', update);
+
+    // Wire preset buttons
+    root.querySelectorAll('.preset-btn').forEach((btn) => {
+       btn.addEventListener('click', () => {
+       const n = parseInt(btn.dataset.n, 10);
+       const exactLambda = 2 * L / n;  // exact wavelength for mode n
+      slider.value = exactLambda;
+    update();
+  });
+});
+
+    update();
+  }
+
+  loadStandingWave().then((Module) => {
+    document.querySelectorAll('[data-widget="boundary-explorer"]').forEach((root) => {
+      initWidget(root, Module);
+    });
+  });
+</script>
